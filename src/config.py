@@ -1,3 +1,5 @@
+import os
+
 config = {
     "binance_keys": {
         "binanceaccount1": {"API_KEY": os.environ.get('BINANCE_API_KEY', ""), "SECRET_KEY": os.environ.get('BINANCE_SECRET_KEY', "")},
