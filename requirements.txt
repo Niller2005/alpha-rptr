@@ -1,10 +1,12 @@
+# To ensure app dependencies are ported from your virtual environment/host machine into your container, run 'pip freeze > requirements.txt' in the terminal to overwrite this file
 matplotlib
 numpy==1.19.5
 ta-lib
-pandas==1.0.3
+pandas
 bravado
 websocket-client==0.52.0
 hyperopt
 pyti
 google-api-python-client
 oauth2client
+wheel

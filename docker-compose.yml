@@ -1,0 +1,8 @@
+version: '3.4'
+
+services:
+  alpharptr:
+    image: niller2005/alpharptr
+    build:
+      context: .
+      dockerfile: ./Dockerfile
