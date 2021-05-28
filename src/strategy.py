@@ -420,8 +420,7 @@ class SMA2(Bot):
         # dec_trend = fast_sma[-1] < slow_sma[-1]
 
         reward = self.risk*self.rr_ratio
-        self.exchange.sltp(profit_long=reward, profit_short=reward, stop_long=self.risk,
-                           stop_short=self.risk, round_decimals=self.price_decimal_num)
+        self.exchange.sltp(profit_long=reward, profit_short=reward, stop_long=self.risk, stop_short=self.risk, round_decimals=self.price_decimal_num)
 
         # if float(self.exchange.get_position()['notional']) == 0.0:
         if self.exchange.get_position_size() == 0.0:
@@ -475,16 +474,14 @@ class YYY(Bot):
 
     def strategy(self, open, close, high, low, volume):
         lot = self.exchange.get_lot()
-        lot = get_calc_lot(lot=lot, decimal_num=self.decimal_num,
-                           leverage=20.0, actual_leverage=3.0)
+        lot = get_calc_lot(lot=lot, decimal_num=self.decimal_num, leverage=20.0, actual_leverage=3.0)
 
         price = self.exchange.get_market_price()
 
-        fast_len = self.input('fast_len', int, int(
-            os.environ.get('FAST_LEN', 5)))
-        slow_len = self.input('slow_len', int, int(
-            os.environ.get('SLOW_LEN', 18)))
+        fast_len = self.input('fast_len', int, int(os.environ.get('FAST_LEN', 5)))
+        slow_len = self.input('slow_len', int, int(os.environ.get('SLOW_LEN', 18)))
         trend_len = self.input('trend_len', int, 90)
+
         print()
         logger.info(f'fast_len: {fast_len}')
         logger.info(f'slow_len: {slow_len}')
@@ -508,17 +505,15 @@ class YYY(Bot):
         logger.info(f'downtrend: {str(downtrend)}')
 
         if dead_cross and uptrend:
-            self.exchange.entry("Long", True, lot,
-                                limit=price - 0.5, when=True)
+            self.exchange.entry("Long", True, lot, limit=price-0.5, when=True)
             logger.info('in dead_cross and uptrend for long')
+
         if float(self.exchange.get_position()['notional']) > 0.0:
-            self.exchange.entry("Long", False, lot, limit=price +
-                                0.5, when=golden_cross)
+            self.exchange.entry("Long", False, lot, limit=price+0.5, when=golden_cross)
 
         if golden_cross and downtrend:
-            self.exchange.entry("Short", False, lot,
-                                limit=price + 0.5, when=True)
-            logger.info('in golden_cross and uptrend for short')
+            self.exchange.entry("Short", False, lot, limit=price+0.5, when=True)
+            logger.info('in golden_cross and downtrend for short')
+
         if float(self.exchange.get_position()['notional']) < 0.0:
-            self.exchange.entry("Short", True, lot, limit=price-0.5,
-                                stop=(price-0.5), when=dead_cross)
+            self.exchange.entry("Short", True, lot, limit=price-0.5, stop=(price-0.5), when=dead_cross)
