@@ -470,7 +470,7 @@ class YYY(Bot):
         Bot.__init__(self, '1m')
 
     def ohlcv_len(self):
-        return 1200
+        return int(os.environ.get('BOT_TREND_LEN', 1200))
 
     def strategy(self, open, close, high, low, volume):
         lot = self.exchange.get_lot()
