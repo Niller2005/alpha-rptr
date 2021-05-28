@@ -16,10 +16,13 @@ from src.binance_futures import BinanceFutures
 from src.bitmex_stub import BitMexStub
 from src.binance_futures_stub import BinanceFuturesStub
 from src.bot import Bot
+from dotenv import load_dotenv
 
 
 # Channel breakout strategy
 from src.gmail_sub import GmailSub
+
+load_dotenv()
 
 
 def get_calc_lot(lot, decimal_num: int, leverage: float, actual_leverage: float):
@@ -465,7 +468,7 @@ class SMA2(Bot):
 
 
 class YYY(Bot):
-    decimal_num = 3
+    decimal_num = int(os.environ.get('DECIMAL_NUM', 3))
 
     def __init__(self):
         Bot.__init__(self, '1m')
@@ -477,8 +480,10 @@ class YYY(Bot):
 
         price = self.exchange.get_market_price()
 
-        fast_len = self.input('fast_len', int, 5)
-        slow_len = self.input('slow_len', int, 18)
+        fast_len = self.input('fast_len', int, int(
+            os.environ.get('FAST_LEN', 5)))
+        slow_len = self.input('slow_len', int, int(
+            os.environ.get('SLOW_LEN', 18)))
         trend_len = self.input('trend_len', int, 90)
         print()
         logger.info(f'fast_len: {fast_len}')

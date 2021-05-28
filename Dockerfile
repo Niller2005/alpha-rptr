@@ -23,8 +23,6 @@ ADD ./requirements.txt /tmp/requirements.txt
 RUN python -m pip install -U pip
 
 RUN pip install -r /tmp/requirements.txt
-RUN pip uninstall numpy -y
-RUN pip install numpy
 
 ADD ./ /opt/webapp/
 WORKDIR /opt/webapp
