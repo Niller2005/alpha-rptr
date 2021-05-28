@@ -465,11 +465,12 @@ class SMA2(Bot):
 
 class YYY(Bot):
     decimal_num = int(os.environ.get('BOT_DECIMAL_NUM', 3))
-    trend_len = 90
-
 
     def __init__(self):
         Bot.__init__(self, '1m')
+
+    def ohlcv_len(self):
+        return 1200
 
     def strategy(self, open, close, high, low, volume):
         lot = self.exchange.get_lot()
@@ -479,16 +480,16 @@ class YYY(Bot):
 
         fast_len = self.input('fast_len', int, int(os.environ.get('BOT_FAST_LEN', 5)))
         slow_len = self.input('slow_len', int, int(os.environ.get('BOT_SLOW_LEN', 18)))
-        # trend_len = self.input('trend_len', int, int(os.environ.get('BOT_TREND_LEN', 90)))
+        trend_len = self.input('trend_len', int, int(os.environ.get('BOT_TREND_LEN', 1200)))
 
         print()
-        logger.info(f'fast_len: {fast_len}')
-        logger.info(f'slow_len: {slow_len}')
-        logger.info(f'trend_len: {self.trend_len}')
+        # logger.info(f'fast_len: {fast_len}')
+        # logger.info(f'slow_len: {slow_len}')
+        # logger.info(f'trend_len: {trend_len}')
 
         fast_sma = sma(close, fast_len)
         slow_sma = sma(close, slow_len)
-        trend_sma = sma(close, self.trend_len)
+        trend_sma = sma(close, trend_len)
 
 
         uptrend = True if trend_sma[-1] > trend_sma[-3] or trend_sma[-1] > trend_sma[-10] else False
@@ -505,8 +506,6 @@ class YYY(Bot):
         logger.info(f'downtrend: {str(downtrend)}')
         logger.info(f'------------------------------------')
 
-        if self.trend_len < int(os.environ.get('BOT_TREND_LEN', 90)):
-            self.trend_len += 1
 
         if not eval(os.environ.get('BOT_TEST', 'False')):
             if dead_cross and uptrend:
