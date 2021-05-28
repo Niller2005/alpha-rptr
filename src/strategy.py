@@ -508,7 +508,7 @@ class YYY(Bot):
                 logger.info('in dead_cross and uptrend for long')
 
             if float(self.exchange.get_position()['notional']) > 0.0:
-                self.exchange.entry("Long", False, lot, limit=price+0.5, when=golden_cross)
+                self.exchange.entry("Long", False, lot, limit=price+0.5, stop=(price+0.5), when=golden_cross)
 
             if golden_cross and downtrend:
                 self.exchange.entry("Short", False, lot, limit=price+0.5, when=True)
