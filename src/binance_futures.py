@@ -955,35 +955,36 @@ class BinanceFutures:
 
         if len(position) > 0:
             position = [p for p in position if p["s"] == self.pair]
+            # logger.info(f'position: {position}')
+            # Was the position size changed?
+            is_update_pos_size = self.get_position_size != float(
+                position[0]['pa'])
 
-        # Was the position size changed?
-        is_update_pos_size = self.get_position_size != float(position[0]['pa'])
+            # Reset trail to current price if position size changes
+            if is_update_pos_size and float(position[0]['pa']) != 0:
+                self.set_trail_price(self.market_price)
 
-        # Reset trail to current price if position size changes
-        if is_update_pos_size and float(position[0]['pa']) != 0:
-            self.set_trail_price(self.market_price)
+            if is_update_pos_size:
+                logger.info(f"Updated Position\n"
+                            f"Price: {self.position[0]['entryPrice']} => {position[0]['ep']}\n"
+                            f"Qty: {self.position[0]['positionAmt']} => {position[0]['pa']}\n"
+                            f"Balance: {self.get_balance()} USDT")
+                notify(f"Updated Position\n"
+                       f"Price: {self.position[0]['entryPrice']} => {position[0]['ep']}\n"
+                       f"Qty: {self.position[0]['positionAmt']} => {position[0]['pa']}\n"
+                       f"Balance: {self.get_balance()} USDT")
 
-        if is_update_pos_size:
-            logger.info(f"Updated Position\n"
-                        f"Price: {self.position[0]['entryPrice']} => {position[0]['ep']}\n"
-                        f"Qty: {self.position[0]['positionAmt']} => {position[0]['pa']}\n"
-                        f"Balance: {self.get_balance()} USDT")
-            notify(f"Updated Position\n"
-                   f"Price: {self.position[0]['entryPrice']} => {position[0]['ep']}\n"
-                   f"Qty: {self.position[0]['positionAmt']} => {position[0]['pa']}\n"
-                   f"Balance: {self.get_balance()} USDT")
+            self.position[0] = {
+                "entryPrice": position[0]['ep'],
+                "marginType": position[0]['mt'],
+                "positionAmt":  position[0]['pa'],
+                "symbol": position[0]['s'],
+                "unRealizedProfit":  position[0]['up'],
+                "positionSide": position[0]['ps'],
+            } if self.position is not None else self.position
 
-        self.position[0] = {
-            "entryPrice": position[0]['ep'],
-            "marginType": position[0]['mt'],
-            "positionAmt":  position[0]['pa'],
-            "symbol": position[0]['s'],
-            "unRealizedProfit":  position[0]['up'],
-            "positionSide": position[0]['ps'],
-        } if self.position is not None else self.position
-
-        self.position_size = float(self.position[0]['positionAmt'])
-        self.entry_price = float(self.position[0]['entryPrice'])
+            self.position_size = float(self.position[0]['positionAmt'])
+            self.entry_price = float(self.position[0]['entryPrice'])
 
         # Evaluation of profit and loss
         self.eval_exit()
