@@ -73,7 +73,7 @@ class Bot:
 
     def strategy(self, open, close, high, low, volume):
         """
-        Strategy function, when creating a bot please inherit this and implement this fn. 
+        Strategy function, when creating a bot please inherit this and implement this fn.
         :param open: open price
         :param close: close price
         :param high: high price
@@ -138,7 +138,7 @@ class Bot:
                 self.exchange = BitMexStub(account=self.account, pair=self.pair)
             else:
                 logger.info(f"--exchange argument missing or invalid")
-                return  
+                return
         elif self.back_test:
             logger.info(f"Bot Mode : Back test")
             if self.exchange_arg == "binance":
@@ -167,7 +167,7 @@ class Bot:
         notify(f"Starting Bot\n"
                f"Strategy : {type(self).__name__}\n"
                f"Balance : {self.exchange.get_balance()}")
-        
+
         self.exchange.show_result()
 
     def stop(self):
