@@ -497,7 +497,7 @@ class YYY(Bot):
         logger.info(f'golden_cross: {golden_cross}')
         logger.info(f'dead_cross: {dead_cross}')
         logger.info(f'price: {price}')
-        logger.info(f'trend_sma: {str(trend_sma[-1])}')
+        logger.info(f'cross: {str(round(fast_sma[-1] - slow_sma[-1], 2))}')
         logger.info(f'uptrend: {str(uptrend)}')
         logger.info(f'downtrend: {str(downtrend)}')
 
