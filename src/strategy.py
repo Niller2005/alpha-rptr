@@ -465,6 +465,8 @@ class SMA2(Bot):
 
 class YYY(Bot):
     decimal_num = int(os.environ.get('BOT_DECIMAL_NUM', 3))
+    trend_len = 90
+
 
     def __init__(self):
         Bot.__init__(self, '1m')
@@ -477,6 +479,7 @@ class YYY(Bot):
 
         fast_len = self.input('fast_len', int, int(os.environ.get('BOT_FAST_LEN', 5)))
         slow_len = self.input('slow_len', int, int(os.environ.get('BOT_SLOW_LEN', 18)))
+
         trend_len = self.input('trend_len', int, int(os.environ.get('BOT_TREND_LEN', 90)))
 
         print()
@@ -487,6 +490,7 @@ class YYY(Bot):
         fast_sma = sma(close, fast_len)
         slow_sma = sma(close, slow_len)
         trend_sma = sma(close, trend_len)
+
 
         uptrend = True if trend_sma[-1] > trend_sma[-3] or trend_sma[-1] > trend_sma[-10] else False
         downtrend = True if trend_sma[-1] < trend_sma[-3] or trend_sma[-1] < trend_sma[-10] else False
@@ -501,6 +505,9 @@ class YYY(Bot):
         logger.info(f'uptrend: {str(uptrend)}')
         logger.info(f'downtrend: {str(downtrend)}')
         logger.info(f'------------------------------------')
+
+        if trend_len < int(os.environ.get('BOT_TREND_LEN', 90)):
+            trend_len += 1
 
         if not eval(os.environ.get('BOT_TEST', 'False')):
             if dead_cross and uptrend:
