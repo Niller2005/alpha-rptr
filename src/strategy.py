@@ -477,7 +477,7 @@ class YYY(Bot):
 
         fast_len = self.input('fast_len', int, int(os.environ.get('BOT_FAST_LEN', 5)))
         slow_len = self.input('slow_len', int, int(os.environ.get('BOT_SLOW_LEN', 18)))
-        trend_len = self.input('trend_len', int, 90)
+        trend_len = self.input('trend_len', int, int(os.environ.get('BOT_TREND_LEN', 90)))
 
         print()
         logger.info(f'fast_len: {fast_len}')
