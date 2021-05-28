@@ -96,7 +96,7 @@ class BitMexStub(BitMex):
         long = pos_size < 0
         ord_qty = abs(pos_size)
         self.commit(id, long, ord_qty, self.get_market_price(), True)
-    
+
     def close_all_at_price(self, price):
         """
         close the current position at price, for backtesting purposes its important to have a function that closes at given price
@@ -105,7 +105,7 @@ class BitMexStub(BitMex):
         pos_size = self.position_size
         if pos_size == 0:
             return
-        long = pos_size < 0 if True else False 
+        long = pos_size < 0 if True else False
         ord_qty = abs(pos_size)
         self.commit(id, long, ord_qty, price, True)
 
@@ -120,8 +120,8 @@ class BitMexStub(BitMex):
 
     def entry(self, id, long, qty, limit=0, stop=0, post_only=False, when=True):
         """
-         I place an order. Equivalent function to pine's function.
-         https://jp.tradingview.com/study-script-reference/#fun_strategy{dot}entry
+         I place an order. Equivalent function to pine's function.
+         https://jp.tradingview.com/study-script-reference/#fun_strategy{dot}entry
         : param id: number of order
         : param long: long or short
         : param qty: order quantity
@@ -130,7 +130,7 @@ class BitMexStub(BitMex):
         : param post_only: post only
         : param when: Do you order?
         : return:
-         """
+        """
         if not when:
             return
 
@@ -166,7 +166,7 @@ class BitMexStub(BitMex):
         :param pyramiding: number of entries you want in pyramiding
         :param when: Do you want to execute the order or not - True for live trading
         :return:
-        """       
+        """
 
         # if self.get_margin()['excessMargin'] <= 0 or qty <= 0:
         #     return
@@ -183,23 +183,23 @@ class BitMexStub(BitMex):
 
         if not long and pos_size <= -(pyramiding*qty):
             return
-        
+
         if cancel_all:
-            self.cancel_all()   
+            self.cancel_all()
 
         if long and pos_size < 0:
             ord_qty = qty + abs(pos_size)
         elif not long and pos_size > 0:
             ord_qty = qty + abs(pos_size)
         else:
-            ord_qty = qty  
-        
+            ord_qty = qty
+
         if long and (pos_size + qty > pyramiding*qty):
             ord_qty = (pyramiding*qty) - abs(pos_size)
 
         if not long and (pos_size - qty < -(pyramiding*qty)):
             ord_qty = (pyramiding*qty) - abs(pos_size)
-        # make sure it doesnt spam small entries, which in most cases would trigger risk management orders evaluation, you can make this less than 2% if needed  
+        # make sure it doesnt spam small entries, which in most cases would trigger risk management orders evaluation, you can make this less than 2% if needed
         if ord_qty < ((pyramiding*qty) / 100) * 2:
             return
 
@@ -211,13 +211,13 @@ class BitMexStub(BitMex):
 
     def commit(self, id, long, qty, price, need_commission=False):
         """
-         Promise.
-         : param id: order number
-         : param long: long or short
-         : param qty: order quantity
-         : param price: price
-         : param need_commission: Does a fee arise?
-        """
+         Promise.
+         : param id: order number
+         : param long: long or short
+         : param qty: order quantity
+         : param price: price
+         : param need_commission: Does a fee arise?
+        """
         self.order_count += 1
 
         order_qty = qty if long else -qty
@@ -242,17 +242,17 @@ class BitMexStub(BitMex):
                     self.max_draw_down = close_rate
 
             self.balance += profit/self.get_market_price()*100000000
-            
+
             if self.balance_ath < self.balance:
                     self.balance_ath = self.balance
             if self.balance_ath > self.balance:
-                if self.max_draw_down_session is 0:
-                    self.max_draw_down_session = self.balance_ath - self.balance 
-                    self.max_draw_down_session_perc = (self.balance_ath - self.balance) / self.balance_ath * 100  
+                if self.max_draw_down_session == 0:
+                    self.max_draw_down_session = self.balance_ath - self.balance
+                    self.max_draw_down_session_perc = (self.balance_ath - self.balance) / self.balance_ath * 100
                 else:
                     if self.max_draw_down_session < self.balance_ath - self.balance:
-                        self.max_draw_down_session = self.balance_ath - self.balance 
-                        self.max_draw_down_session_perc = (self.balance_ath - self.balance) / self.balance_ath * 100                         
+                        self.max_draw_down_session = self.balance_ath - self.balance
+                        self.max_draw_down_session_perc = (self.balance_ath - self.balance) / self.balance_ath * 100
 
             if self.enable_trade_log:
                 logger.info(f"========= Close Position =============")
@@ -277,17 +277,17 @@ class BitMexStub(BitMex):
                 logger.info(f"TRADE COUNT   : {self.order_count}")
                 logger.info(f"ID            : {id}")
                 logger.info(f"POSITION SIZE : {qty}")
-                logger.info(f"**************************************")               
+                logger.info(f"**************************************")
             if long and self.position_size < next_qty:
-                self.position_avg_price = (self.position_avg_price * self.position_size + price * qty) /  next_qty 
+                self.position_avg_price = (self.position_avg_price * self.position_size + price * qty) /  next_qty
             elif not long and self.position_size > next_qty:
                 self.position_avg_price = (self.position_avg_price * self.position_size - price * qty) /  next_qty
             else:
                  self.position_avg_price = price
             self.position_size = next_qty
-            logger.info(f"**********{next_qty}") 
-              
-           
+            logger.info(f"**********{next_qty}")
+
+
             self.set_trail_price(price)
         else:
             self.position_size = 0
