@@ -376,8 +376,8 @@ class Sample(Bot):
 
 
 class SMA2(Bot):
-    decimal_num = int(os.environ.get('DECIMAL_NUM', 3))
-    price_decimal_num = int(os.environ.get('PRICE_DECIMAL_NUM', 2))
+    decimal_num = int(os.environ.get('BOT_DECIMAL_NUM', 3))
+    price_decimal_num = int(os.environ.get('BOT_PRICE_DECIMAL_NUM', 2))
     rr_ratio = 2
     risk = 0.5
 
@@ -394,13 +394,10 @@ class SMA2(Bot):
     def strategy(self, open, close, high, low, volume):
 
         lot = self.exchange.get_lot()
-        lot = get_calc_lot(lot=lot, decimal_num=self.decimal_num,
-                           leverage=20.0, actual_leverage=3.0)
+        lot = get_calc_lot(lot=lot, decimal_num=self.decimal_num, leverage=20.0, actual_leverage=3.0)
 
-        fast_len = self.input('fast_len', int, int(
-            os.environ.get('FAST_LEN', 5)))
-        slow_len = self.input('slow_len', int, int(
-            os.environ.get('SLOW_LEN', 18)))
+        fast_len = self.input('fast_len', int, int(os.environ.get('BOT_FAST_LEN', 5)))
+        slow_len = self.input('slow_len', int, int(os.environ.get('BOT_SLOW_LEN', 18)))
         trend_len = self.input('trend_len', int, 90)
 
         logger.info(f"fast_len: {fast_len}")
@@ -467,7 +464,7 @@ class SMA2(Bot):
 
 
 class YYY(Bot):
-    decimal_num = int(os.environ.get('DECIMAL_NUM', 3))
+    decimal_num = int(os.environ.get('BOT_DECIMAL_NUM', 3))
 
     def __init__(self):
         Bot.__init__(self, '1m')
@@ -478,8 +475,8 @@ class YYY(Bot):
 
         price = self.exchange.get_market_price()
 
-        fast_len = self.input('fast_len', int, int(os.environ.get('FAST_LEN', 5)))
-        slow_len = self.input('slow_len', int, int(os.environ.get('SLOW_LEN', 18)))
+        fast_len = self.input('fast_len', int, int(os.environ.get('BOT_FAST_LEN', 5)))
+        slow_len = self.input('slow_len', int, int(os.environ.get('BOT_SLOW_LEN', 18)))
         trend_len = self.input('trend_len', int, 90)
 
         print()
