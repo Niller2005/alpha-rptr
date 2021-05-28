@@ -477,7 +477,7 @@ class YYY(Bot):
 
         fast_len = self.input('fast_len', int, int(os.environ.get('BOT_FAST_LEN', 5)))
         slow_len = self.input('slow_len', int, int(os.environ.get('BOT_SLOW_LEN', 18)))
-        trend_len = self.input('trend_len', int, 90)
+        trend_len = self.input('trend_len', int, int(os.environ.get('BOT_TREND_LEN', 90)))
 
         print()
         logger.info(f'fast_len: {fast_len}')
@@ -500,17 +500,19 @@ class YYY(Bot):
         logger.info(f'cross: {str(round(fast_sma[-1] - slow_sma[-1], 2))}')
         logger.info(f'uptrend: {str(uptrend)}')
         logger.info(f'downtrend: {str(downtrend)}')
+        logger.info(f'------------------------------------')
 
-        if dead_cross and uptrend:
-            self.exchange.entry("Long", True, lot, limit=price-0.5, when=True)
-            logger.info('in dead_cross and uptrend for long')
+        if not eval(os.environ.get('BOT_TEST', 'False')):
+            if dead_cross and uptrend:
+                self.exchange.entry("Long", True, lot, limit=price-0.5, when=True)
+                logger.info('in dead_cross and uptrend for long')
 
-        if float(self.exchange.get_position()['notional']) > 0.0:
-            self.exchange.entry("Long", False, lot, limit=price+0.5, when=golden_cross)
+            if float(self.exchange.get_position()['notional']) > 0.0:
+                self.exchange.entry("Long", False, lot, limit=price+0.5, stop=(price+0.5), when=golden_cross)
 
-        if golden_cross and downtrend:
-            self.exchange.entry("Short", False, lot, limit=price+0.5, when=True)
-            logger.info('in golden_cross and downtrend for short')
+            if golden_cross and downtrend:
+                self.exchange.entry("Short", False, lot, limit=price+0.5, when=True)
+                logger.info('in golden_cross and downtrend for short')
 
-        if float(self.exchange.get_position()['notional']) < 0.0:
-            self.exchange.entry("Short", True, lot, limit=price-0.5, stop=(price-0.5), when=dead_cross)
+            if float(self.exchange.get_position()['notional']) < 0.0:
+                self.exchange.entry("Short", True, lot, limit=price-0.5, stop=(price-0.5), when=dead_cross)

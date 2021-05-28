@@ -957,6 +957,7 @@ class BinanceFutures:
             position = [p for p in position if p["s"] == self.pair]
             # logger.info(f'position: {position}')
             # Was the position size changed?
+        if len(position) == 1:
             is_update_pos_size = self.get_position_size != float(
                 position[0]['pa'])
 
