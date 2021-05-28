@@ -501,8 +501,6 @@ class YYY(Bot):
         logger.info(f'uptrend: {str(uptrend)}')
         logger.info(f'downtrend: {str(downtrend)}')
         logger.info(f'------------------------------------')
-        logger.info(f'{trend_sma}')
-        logger.info(f'------------------------------------')
 
         if not eval(os.environ.get('BOT_TEST', 'False')):
             if dead_cross and uptrend:
