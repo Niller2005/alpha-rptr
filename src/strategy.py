@@ -470,7 +470,7 @@ class YYY(Bot):
         Bot.__init__(self, '1m')
 
     def ohlcv_len(self):
-        return int(os.environ.get('BOT_TREND_LEN', 1200))
+        return int(os.environ.get('BOT_TREND_LEN', 1200))+10
 
     def strategy(self, open, close, high, low, volume):
         lot = self.exchange.get_lot()
@@ -504,6 +504,8 @@ class YYY(Bot):
         logger.info(f'cross: {str(round(fast_sma[-1] - slow_sma[-1], 2))}')
         logger.info(f'uptrend: {str(uptrend)}')
         logger.info(f'downtrend: {str(downtrend)}')
+        logger.info(f'------------------------------------')
+        logger.info(f'{trend_sma[-1]} {trend_sma[-3]} {trend_sma[-10]}')
         logger.info(f'------------------------------------')
 
 
