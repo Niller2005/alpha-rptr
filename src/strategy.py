@@ -511,15 +511,15 @@ class YYY(Bot):
 
         if not eval(os.environ.get('BOT_TEST', 'False')):
             if dead_cross and uptrend:
-                self.exchange.entry("Long", True, lot, limit=price-0.5, when=True)
+                self.exchange.entry("Long", True, lot, limit=price-0.5, when=True, post_only=True)
                 logger.info('in dead_cross and uptrend for long')
 
             if float(self.exchange.get_position()['notional']) > 0.0:
-                self.exchange.entry("Long", False, lot, limit=price+0.5, stop=(price+0.5), when=golden_cross)
+                self.exchange.entry("Long", False, lot, limit=price+0.5, stop=(price+0.5), when=golden_cross, post_only=True)
 
             if golden_cross and downtrend:
-                self.exchange.entry("Short", False, lot, limit=price+0.5, when=True)
+                self.exchange.entry("Short", False, lot, limit=price+0.5, when=True, post_only=True)
                 logger.info('in golden_cross and downtrend for short')
 
             if float(self.exchange.get_position()['notional']) < 0.0:
-                self.exchange.entry("Short", True, lot, limit=price-0.5, stop=(price-0.5), when=dead_cross)
+                self.exchange.entry("Short", True, lot, limit=price-0.5, stop=(price-0.5), when=dead_cross, post_only=True)
