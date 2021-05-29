@@ -142,20 +142,25 @@ class BinanceFutures:
         :return:
         """
         self.__init_client()
-        return float(self.get_margin()[0]["balance"])
+        return float(self.get_margin()["balance"])
 
-    def get_margin(self):
+    def get_margin(self, asset='USDT'):
         """
         get margin
         :return:
         """
         self.__init_client()
-        if self.margin is not None:
-            return self.margin
-        else:  # when the WebSocket cant get it
-            self.margin = retry(lambda: self.client
-                                .futures_account_balance_v2())
-            return self.margin
+
+        # if self.margin is not None:
+        #     return self.margin[0]
+        # else:  # when the WebSocket cant get it
+        ret = retry(lambda: self.client
+                            .futures_account_balance_v2())
+        if len(ret) > 0:
+            self.margin = [m for m in ret if m['asset'] == asset]
+            return self.margin[0]
+        else:
+            return None
 
     def get_leverage(self):
         """
@@ -269,11 +274,12 @@ class BinanceFutures:
         """
         cancel all orders
         """
-        self.__init_client()
-        res = retry(
-            lambda: self.client.futures_cancel_all_open_orders(symbol=self.pair))
-        # for order in orders:
-        logger.info(f"Cancel all open orders: {res}")
+        if not eval(os.environ.get('BOT_TEST', 'False')):
+            self.__init_client()
+            res = retry(
+                lambda: self.client.futures_cancel_all_open_orders(symbol=self.pair))
+            # for order in orders:
+            logger.info(f"Cancel all open orders: {res}")
 
     def close_all(self):
         """
@@ -441,6 +447,9 @@ class BinanceFutures:
 
         # if self.get_margin()['excessMargin'] <= 0 or qty <= 0:
         #     return
+
+        if round((limit * qty) / 20, 2) > round(float(self.get_margin()['availableBalance']), 2):
+            return
 
         if not when:
             return
