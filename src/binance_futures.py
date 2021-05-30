@@ -322,6 +322,14 @@ class BinanceFutures:
                     f"{order['price']}, {order['stopPrice']})")
         return True
 
+    def cancel_orders_by_side(self, side):
+        orders = self.get_all_open_orders()
+        if orders is not None:
+            orders = [o for o in orders if o["side"] == side]
+            for o in orders: self.cancel(o['orderId'])
+        else:
+            return
+
     def __new_order(self, ord_id, side, ord_qty, limit=0, stop=0, post_only=False, reduce_only=False, trailing_stop=0, activationPrice=0):
         """
         create an order
