@@ -483,15 +483,9 @@ class YYY(Bot):
         slow_len = self.input('slow_len', int, int(os.environ.get('BOT_SLOW_LEN', 18)))
         trend_len = self.input('trend_len', int, int(os.environ.get('BOT_TREND_LEN', 1200)))
 
-        print()
-        # logger.info(f'fast_len: {fast_len}')
-        # logger.info(f'slow_len: {slow_len}')
-        # logger.info(f'trend_len: {trend_len}')
-
         fast_sma = sma(close, fast_len)
         slow_sma = sma(close, slow_len)
         trend_sma = sma(close, trend_len)
-
 
         uptrend = True if trend_sma[-1] > trend_sma[-3] or trend_sma[-1] > trend_sma[-10] else False
         downtrend = True if trend_sma[-1] < trend_sma[-3] or trend_sma[-1] < trend_sma[-10] else False
@@ -500,19 +494,17 @@ class YYY(Bot):
         dead_cross = crossunder(fast_sma, slow_sma)
 
         nc = 'golden' if round(fast_sma[-1] - slow_sma[-1], 2) < 0 else 'dead'
-        ct = 'down' if downtrend else 'up'
+        ct = 'down' if downtrend else ('sideways' if downtrend and uptrend else 'up')
         cp = 'long' if pos_size > 0 else 'short'
 
-        np = 'short' if (nc == 'golden' and (ct == 'down' or cp == 'long')) else 'long'
+        np = 'short' if nc == 'golden' and (downtrend or not cp == 'short') else ('long' if nc == 'dead' and (uptrend or not cp == 'long') else 'short')
 
-        logger.info(f'position: {cp}')
-        logger.info(f'trend: {ct}')
-        logger.info(f'next cross: {nc}')
-        logger.info(f'next position: {np} @ {round(price*1.001, self.decimal_num) if np == "short" else round(price/1.001, self.decimal_num)}')
         logger.info(f'------------------------------------')
-        if not (trend_sma[-1] != trend_sma[-1] or trend_sma[-3] != trend_sma[-3] or trend_sma[-10] != trend_sma[-10]):
-            logger.info(f'{round(trend_sma[-1], 2)} {round(trend_sma[-3], 2)} {round(trend_sma[-10], 2)}')
+        logger.info(f'trend: {ct}')
+        logger.info(f'next cross: {nc} -> {np} @ {round(price*1.001, self.decimal_num) if np == "short" else round(price/1.001, self.decimal_num)}')
+        if (trend_sma[-1] != trend_sma[-1] or trend_sma[-3] != trend_sma[-3] or trend_sma[-10] != trend_sma[-10]):
             logger.info(f'------------------------------------')
+            logger.info(f'Bot status: NEEDS RESTART')
 
         if not eval(os.environ.get('BOT_TEST', 'False')):
             if dead_cross and uptrend:
