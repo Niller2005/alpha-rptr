@@ -36,9 +36,7 @@ def calc_entry_price(price, long, price_decimals=2):
     if long:
         return round(price-(0.1/100*price), price_decimals)
     else:
-        return round(price+(0.1/100*price), price_decimals)
-
-
+        return round(price + (0.1 / 100 * price), price_decimals)
 
 class Doten(Bot):
     def __init__(self):
@@ -514,8 +512,15 @@ class YYY(Bot):
             logger.info(f'--------------------------------------')
             logger.info(f'Bot status: NEEDS RESTART')
 
+        # logger.info(f'--------------------------------------')
+        # logger.info(f'{self.exchange.get_all_open_orders()}')
+
+
+
         if not eval(os.environ.get('BOT_TEST', 'False')):
+
             if dead_cross and uptrend:
+                self.exchange.cancel_orders_by_side('BUY')
                 self.exchange.entry("Long", True, lot, limit=calc_entry_price(price, True, self.price_decimal_num), when=True, post_only=True)
                 logger.info('in dead_cross and uptrend for long')
 
@@ -523,6 +528,7 @@ class YYY(Bot):
                 self.exchange.entry("Long", False, lot, limit=calc_entry_price(price, False, self.price_decimal_num), stop=(calc_entry_price(price, False, self.price_decimal_num)), when=golden_cross, post_only=True)
 
             if golden_cross and downtrend:
+                self.exchange.cancel_orders_by_side('SELL')
                 self.exchange.entry("Short", False, lot, limit=calc_entry_price(price, False, self.price_decimal_num), when=True, post_only=True)
                 logger.info('in golden_cross and downtrend for short')
 
