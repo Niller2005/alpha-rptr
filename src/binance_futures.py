@@ -455,7 +455,7 @@ class BinanceFutures:
             return
 
         pos_size = self.get_position_size()
-        logger.info(f"pos_size: {pos_size}")
+        # logger.info(f"pos_size: {pos_size}")
 
         if long and pos_size > 0:
             return
@@ -710,7 +710,7 @@ class BinanceFutures:
             return
         # tp
         tp_order = self.get_open_order('TP')
-        logger.info(f"tp_order: {tp_order}")
+        # logger.info(f"tp_order: {tp_order}")
 
         is_tp_full_size = False
         is_sl_full_size = False
@@ -723,8 +723,8 @@ class BinanceFutures:
         tp_percent_long = self.get_sltp_values()['profit_long']
         tp_percent_short = self.get_sltp_values()['profit_short']
 
-        logger.info(f"TPL: {tp_percent_long}")
-        logger.info(f"TPS: {tp_percent_short}")
+        # logger.info(f"TPL: {tp_percent_long}")
+        # logger.info(f"TPS: {tp_percent_short}")
 
         avg_entry = self.get_position_avg_price()
 
@@ -977,10 +977,10 @@ class BinanceFutures:
                 self.set_trail_price(self.market_price)
 
             if is_update_pos_size:
-                logger.info(f"Updated Position\n"
-                            f"Price: {self.position[0]['entryPrice']} => {position[0]['ep']}\n"
-                            f"Qty: {self.position[0]['positionAmt']} => {position[0]['pa']}\n"
-                            f"Balance: {self.get_balance()} USDT")
+                logger.info(f"Updated Position")
+                logger.info(f"Price: {self.position[0]['entryPrice']} => {position[0]['ep']}")
+                logger.info(f"Qty: {self.position[0]['positionAmt']} => {position[0]['pa']}")
+                logger.info(f"Balance: {self.get_balance()} USDT")
                 notify(f"Updated Position\n"
                        f"Price: {self.position[0]['entryPrice']} => {position[0]['ep']}\n"
                        f"Qty: {self.position[0]['positionAmt']} => {position[0]['pa']}\n"
