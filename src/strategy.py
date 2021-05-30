@@ -524,7 +524,7 @@ class YYY(Bot):
                 self.exchange.entry("Long", False, lot, limit=calc_entry_price(price, False, self.price_decimal_num), stop=(calc_entry_price(price, False, self.price_decimal_num)), when=golden_cross, post_only=True)
 
             if golden_cross and downtrend:
-                self.exchange.entry("Short", False, lot, calc_entry_price(price, False, self.price_decimal_num), when=True, post_only=True)
+                self.exchange.entry("Short", False, lot, limit=calc_entry_price(price, False, self.price_decimal_num), when=True, post_only=True)
                 logger.info('in golden_cross and downtrend for short')
 
             if float(self.exchange.get_position()['notional']) < 0.0:
