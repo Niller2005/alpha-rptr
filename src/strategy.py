@@ -500,12 +500,12 @@ class YYY(Bot):
 
         np = 'short' if nc == 'golden' and (downtrend or not cp == 'short') else ('long' if nc == 'dead' and (uptrend or not cp == 'long') else 'short')
 
-        logger.info(f'------------------------------------')
+        logger.info(f'--------------------------------------')
         logger.info(f'trend: {ct}')
         logger.info(f'next cross: {nc} -> {np} @ {round(price*1.001, self.price_decimal_num) if np == "short" else round(price/1.001, self.price_decimal_num)}')
         logger.info(f'size: {lot}')
         if (trend_sma[-1] != trend_sma[-1] or trend_sma[-3] != trend_sma[-3] or trend_sma[-10] != trend_sma[-10]):
-            logger.info(f'------------------------------------')
+            logger.info(f'--------------------------------------')
             logger.info(f'Bot status: NEEDS RESTART')
 
         if not eval(os.environ.get('BOT_TEST', 'False')):
