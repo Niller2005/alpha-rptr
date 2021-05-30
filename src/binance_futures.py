@@ -326,7 +326,7 @@ class BinanceFutures:
         orders = self.get_all_open_orders()
         if orders is not None:
             orders = [o for o in orders if o["side"] == side]
-            for o in orders: self.cancel(o['orderId'])
+            for o in orders: self.cancel(str(o['clientOrderId']))
         else:
             return
 
