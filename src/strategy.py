@@ -477,6 +477,7 @@ class YYY(Bot):
         lot = get_calc_lot(lot=lot, decimal_num=self.decimal_num, leverage=20.0, actual_leverage=3.0)
 
         price = self.exchange.get_market_price()
+        pos_size = self.exchange.get_position_size()
 
         fast_len = self.input('fast_len', int, int(os.environ.get('BOT_FAST_LEN', 5)))
         slow_len = self.input('slow_len', int, int(os.environ.get('BOT_SLOW_LEN', 18)))
