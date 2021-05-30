@@ -508,7 +508,7 @@ class YYY(Bot):
         logger.info(f'position: {cp}')
         logger.info(f'trend: {ct}')
         logger.info(f'next cross: {nc}')
-        logger.info(f'next position: {np}')
+        logger.info(f'next position: {np} @ {round(price*1.001, decimal_num) if np == "short" else round(price/1.001, decimal_num)}')
         logger.info(f'------------------------------------')
         if not (trend_sma[-1] != trend_sma[-1] or trend_sma[-3] != trend_sma[-3] or trend_sma[-10] != trend_sma[-10]):
             logger.info(f'{round(trend_sma[-1], 2)} {round(trend_sma[-3], 2)} {round(trend_sma[-10], 2)}')
@@ -516,15 +516,15 @@ class YYY(Bot):
 
         if not eval(os.environ.get('BOT_TEST', 'False')):
             if dead_cross and uptrend:
-                self.exchange.entry("Long", True, lot, limit=price/1.001, when=True, post_only=True)
+                self.exchange.entry("Long", True, lot, limit=round(price/1.001, decimal_num), when=True, post_only=True)
                 logger.info('in dead_cross and uptrend for long')
 
             if float(self.exchange.get_position()['notional']) > 0.0:
-                self.exchange.order("Long", False, lot, limit=price*1.001, stop=(price*1.001), when=golden_cross, post_only=True)
+                self.exchange.order("Long", False, lot, limit=round(price*1.001, decimal_num), stop=(round(price*1.001, decimal_num)), when=golden_cross, post_only=True)
 
             if golden_cross and downtrend:
-                self.exchange.entry("Short", False, lot, limit=price*1.001, when=True, post_only=True)
+                self.exchange.entry("Short", False, lot, round(price*1.001, decimal_num), when=True, post_only=True)
                 logger.info('in golden_cross and downtrend for short')
 
             if float(self.exchange.get_position()['notional']) < 0.0:
-                self.exchange.order("Short", True, lot, limit=price/1.001, stop=(price/1.001), when=dead_cross, post_only=True)
+                self.exchange.order("Short", True, lot, limit=round(price/1.001, decimal_num), stop=(round(price/1.001, decimal_num)), when=dead_cross, post_only=True)
