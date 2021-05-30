@@ -498,16 +498,20 @@ class YYY(Bot):
         golden_cross = crossover(fast_sma, slow_sma)
         dead_cross = crossunder(fast_sma, slow_sma)
 
-        logger.info(f'golden_cross: {golden_cross}')
-        logger.info(f'dead_cross: {dead_cross}')
-        logger.info(f'price: {price}')
-        logger.info(f'cross: {str(round(fast_sma[-1] - slow_sma[-1], 2))}')
-        logger.info(f'uptrend: {str(uptrend)}')
-        logger.info(f'downtrend: {str(downtrend)}')
-        logger.info(f'------------------------------------')
-        logger.info(f'{trend_sma[-1]} {trend_sma[-3]} {trend_sma[-10]}')
-        logger.info(f'------------------------------------')
+        nc = 'golden' if round(fast_sma[-1] - slow_sma[-1], 2) < 0 else 'dead'
+        ct = 'down' if downtrend else 'up'
+        cp = 'long' if pos_size > 0 else 'short'
 
+        np = 'short' if (nc == 'golden' and (ct == 'down' or cp == 'long')) else 'long'
+
+        logger.info(f'position: {cp}')
+        logger.info(f'trend: {ct}')
+        logger.info(f'next cross: {nc}')
+        logger.info(f'next position: {np}')
+        logger.info(f'------------------------------------')
+        if not (trend_sma[-1] != trend_sma[-1] or trend_sma[-3] != trend_sma[-3] or trend_sma[-10] != trend_sma[-10]):
+            logger.info(f'{round(trend_sma[-1], 2)} {round(trend_sma[-3], 2)} {round(trend_sma[-10], 2)}')
+            logger.info(f'------------------------------------')
 
         if not eval(os.environ.get('BOT_TEST', 'False')):
             if dead_cross and uptrend:
