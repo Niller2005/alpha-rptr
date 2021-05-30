@@ -475,7 +475,7 @@ class YYY(Bot):
 
     def strategy(self, open, close, high, low, volume):
         lot = self.exchange.get_lot()
-        lot = get_calc_lot(lot=lot, decimal_num=self.decimal_num, leverage=20.0, actual_leverage=3.0)
+        lot = round(lot*0.2, self.decimal_num)
 
         price = self.exchange.get_market_price()
         pos_size = self.exchange.get_position_size()
@@ -503,6 +503,7 @@ class YYY(Bot):
         logger.info(f'------------------------------------')
         logger.info(f'trend: {ct}')
         logger.info(f'next cross: {nc} -> {np} @ {round(price*1.001, self.price_decimal_num) if np == "short" else round(price/1.001, self.price_decimal_num)}')
+        logger.info(f'size: {lot}')
         if (trend_sma[-1] != trend_sma[-1] or trend_sma[-3] != trend_sma[-3] or trend_sma[-10] != trend_sma[-10]):
             logger.info(f'------------------------------------')
             logger.info(f'Bot status: NEEDS RESTART')
