@@ -32,6 +32,13 @@ def get_calc_lot(lot, decimal_num: int, leverage: float, actual_leverage: float)
     calc_lot = round(calc_lot, decimal_num)
     return calc_lot
 
+def calc_entry_price(price, long, price_decimals=2):
+    if long:
+        return round(price-(0.1/100*price), price_decimals)
+    else:
+        return round(price+(0.1/100*price), price_decimals)
+
+
 
 class Doten(Bot):
     def __init__(self):
@@ -502,7 +509,7 @@ class YYY(Bot):
 
         logger.info(f'--------------------------------------')
         logger.info(f'trend: {ct}')
-        logger.info(f'next cross: {nc} -> {np} @ {round(price*1.001, self.price_decimal_num) if np == "short" else round(price/1.001, self.price_decimal_num)}')
+        logger.info(f'next cross: {nc} -> {np} @ {calc_entry_price(price, False, self.price_decimal_num) if np == "short" else calc_entry_price(price, True, self.price_decimal_num)}')
         logger.info(f'size: {lot}')
         if (trend_sma[-1] != trend_sma[-1] or trend_sma[-3] != trend_sma[-3] or trend_sma[-10] != trend_sma[-10]):
             logger.info(f'--------------------------------------')
@@ -510,15 +517,15 @@ class YYY(Bot):
 
         if not eval(os.environ.get('BOT_TEST', 'False')):
             if dead_cross and uptrend:
-                self.exchange.entry("Long", True, lot, limit=round(price/1.001, self.price_decimal_num), when=True, post_only=True)
+                self.exchange.entry("Long", True, lot, limit=calc_entry_price(price, True, self.price_decimal_num), when=True, post_only=True)
                 logger.info('in dead_cross and uptrend for long')
 
             if float(self.exchange.get_position()['notional']) > 0.0:
-                self.exchange.entry("Long", False, lot, limit=round(price*1.001, self.price_decimal_num), stop=(round(price*1.001, self.price_decimal_num)), when=golden_cross, post_only=True)
+                self.exchange.entry("Long", False, lot, limit=calc_entry_price(price, False, self.price_decimal_num), stop=(calc_entry_price(price, False, self.price_decimal_num)), when=golden_cross, post_only=True)
 
             if golden_cross and downtrend:
-                self.exchange.entry("Short", False, lot, round(price*1.001, self.price_decimal_num), when=True, post_only=True)
+                self.exchange.entry("Short", False, lot, calc_entry_price(price, False, self.price_decimal_num), when=True, post_only=True)
                 logger.info('in golden_cross and downtrend for short')
 
             if float(self.exchange.get_position()['notional']) < 0.0:
-                self.exchange.entry("Short", True, lot, limit=round(price/1.001, self.price_decimal_num), stop=(round(price/1.001, self.price_decimal_num)), when=dead_cross, post_only=True)
+                self.exchange.entry("Short", True, lot, limit=calc_entry_price(price, True, self.price_decimal_num), stop=(calc_entry_price(price, True, self.price_decimal_num)), when=dead_cross, post_only=True)
