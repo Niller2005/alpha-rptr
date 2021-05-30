@@ -513,19 +513,16 @@ class YYY(Bot):
             logger.info(f'Bot status: NEEDS RESTART')
 
         # logger.info(f'--------------------------------------')
-        # logger.info(f'{self.exchange.get_all_open_orders()}')
-
-
+        # logger.info(f'{abs(pos_size)}')
 
         if not eval(os.environ.get('BOT_TEST', 'False')):
-
             if dead_cross and uptrend:
                 self.exchange.cancel_orders_by_side('BUY')
                 self.exchange.entry("Long", True, lot, limit=calc_entry_price(price, True, self.price_decimal_num), when=True, post_only=True)
                 logger.info('in dead_cross and uptrend for long')
 
             if float(self.exchange.get_position()['notional']) > 0.0:
-                self.exchange.entry("Long", False, lot, limit=calc_entry_price(price, False, self.price_decimal_num), stop=(calc_entry_price(price, False, self.price_decimal_num)), when=golden_cross, post_only=True)
+                self.exchange.entry("Long", False, abs(pos_size), limit=calc_entry_price(price, False, self.price_decimal_num), stop=(calc_entry_price(price, False, self.price_decimal_num)), when=golden_cross, post_only=True)
 
             if golden_cross and downtrend:
                 self.exchange.cancel_orders_by_side('SELL')
@@ -533,4 +530,4 @@ class YYY(Bot):
                 logger.info('in golden_cross and downtrend for short')
 
             if float(self.exchange.get_position()['notional']) < 0.0:
-                self.exchange.entry("Short", True, lot, limit=calc_entry_price(price, True, self.price_decimal_num), stop=(calc_entry_price(price, True, self.price_decimal_num)), when=dead_cross, post_only=True)
+                self.exchange.entry("Short", True, abs(pos_size), limit=calc_entry_price(price, True, self.price_decimal_num), stop=(calc_entry_price(price, True, self.price_decimal_num)), when=dead_cross, post_only=True)
