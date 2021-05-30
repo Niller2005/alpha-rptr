@@ -512,11 +512,11 @@ class YYY(Bot):
                 logger.info('in dead_cross and uptrend for long')
 
             if float(self.exchange.get_position()['notional']) > 0.0:
-                self.exchange.order("Long", False, lot, limit=round(price*1.001, self.decimal_num), stop=(round(price*1.001, self.decimal_num)), when=golden_cross, post_only=True)
+                self.exchange.entry("Long", False, lot, limit=round(price*1.001, self.decimal_num), stop=(round(price*1.001, self.decimal_num)), when=golden_cross, post_only=True)
 
             if golden_cross and downtrend:
                 self.exchange.entry("Short", False, lot, round(price*1.001, self.decimal_num), when=True, post_only=True)
                 logger.info('in golden_cross and downtrend for short')
 
             if float(self.exchange.get_position()['notional']) < 0.0:
-                self.exchange.order("Short", True, lot, limit=round(price/1.001, self.decimal_num), stop=(round(price/1.001, self.decimal_num)), when=dead_cross, post_only=True)
+                self.exchange.entry("Short", True, lot, limit=round(price/1.001, self.decimal_num), stop=(round(price/1.001, self.decimal_num)), when=dead_cross, post_only=True)
