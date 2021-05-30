@@ -463,7 +463,7 @@ class BinanceFutures:
         if not long and pos_size < 0:
             return
 
-        ord_qty = qty + abs(pos_size)
+        ord_qty = round(qty + abs(pos_size), int(os.environ.get('BOT_DECIMAL_NUM', 3)))
 
         trailing_stop = 0
         activationPrice = 0

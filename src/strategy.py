@@ -509,8 +509,7 @@ class YYY(Bot):
 
         logger.info(f'--------------------------------------')
         logger.info(f'trend: {ct}')
-        logger.info(f'next cross: {nc} -> {np} @ {calc_entry_price(price, False, self.price_decimal_num) if np == "short" else calc_entry_price(price, True, self.price_decimal_num)}')
-        logger.info(f'size: {lot}')
+        logger.info(f'next cross: {nc} > {np} > {lot} @ {calc_entry_price(price, False, self.price_decimal_num) if np == "short" else calc_entry_price(price, True, self.price_decimal_num)}')
         if (trend_sma[-1] != trend_sma[-1] or trend_sma[-3] != trend_sma[-3] or trend_sma[-10] != trend_sma[-10]):
             logger.info(f'--------------------------------------')
             logger.info(f'Bot status: NEEDS RESTART')
