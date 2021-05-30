@@ -517,7 +517,7 @@ class YYY(Bot):
 
         if not eval(os.environ.get('BOT_TEST', 'False')):
             if dead_cross and uptrend:
-                self.exchange.cancel_orders_by_side('BUY')
+                # self.exchange.cancel_orders_by_side('BUY')
                 self.exchange.order("Long", True, lot, limit=calc_entry_price(price, True, self.price_decimal_num), when=True, post_only=True)
                 logger.info('in dead_cross and uptrend for long')
 
@@ -525,7 +525,7 @@ class YYY(Bot):
                 self.exchange.order("Long", False, abs(pos_size), limit=calc_entry_price(price, False, self.price_decimal_num), stop=(calc_entry_price(price, False, self.price_decimal_num)), when=golden_cross, post_only=True)
 
             if golden_cross and downtrend:
-                self.exchange.cancel_orders_by_side('SELL')
+                # self.exchange.cancel_orders_by_side('SELL')
                 self.exchange.order("Short", False, lot, limit=calc_entry_price(price, False, self.price_decimal_num), when=True, post_only=True)
                 logger.info('in golden_cross and downtrend for short')
 
