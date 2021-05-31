@@ -43,7 +43,7 @@ def ord_suffix():
 def load_data(file):
     """
     Read data from a file.
-    """    
+    """
     source = pd.read_csv(file)
     # data_frame = pd.DataFrame({
     #     'timestamp': pd.to_datetime(source['timestamp']),
@@ -58,7 +58,7 @@ def load_data(file):
     return source
 
 
-def validate_continuous(data, bin_size):    
+def validate_continuous(data, bin_size):
     last_date = None
     for i in range(len(data)):
         index = data.iloc[-1 * (i + 1)].name
@@ -70,28 +70,28 @@ def validate_continuous(data, bin_size):
         last_date = index
     return True, None
 
-def to_data_frame(data):    
-    data_frame = pd.DataFrame(data, columns=["timestamp", "high", "low", "open", "close", "volume"])    
+def to_data_frame(data):
+    data_frame = pd.DataFrame(data, columns=["timestamp", "high", "low", "open", "close", "volume"])
     data_frame = data_frame.set_index("timestamp")
-    data_frame = data_frame.tz_localize(None).tz_localize('UTC', level=0)    
+    data_frame = data_frame.tz_localize(None).tz_localize('UTC', level=0)
     return data_frame
 
 
-def resample(data_frame, bin_size):    
-    resample_time = allowed_range[bin_size][1]    
+def resample(data_frame, bin_size):
+    resample_time = allowed_range[bin_size][1]
     return data_frame.resample(resample_time, label='right', closed='right').agg({
         "open": "first",
         "high": "max",
         "low": "min",
         "close": "last",
         "volume": "sum",
-    })    
+    })
 
 def retry(func, count=5):
     err = None
     for i in range(count):
-        try:           
-            ret, res = func()            
+        try:
+            ret, res = func()
             rate_limit = int(res.headers['X-RateLimit-Limit'])
             rate_remain = int(res.headers['X-RateLimit-Remaining'])
             if rate_remain < 10:
@@ -115,17 +115,17 @@ def retry(func, count=5):
 def retry_binance_futures(func, count=5):
     err = None
     for i in range(count):
-        try:            
+        try:
             ret, res = func()
 
-            #res_header = res.headers['X-MBX-USED-WEIGHT-1M']                   
+            #res_header = res.headers['X-MBX-USED-WEIGHT-1M']
             rate_limit = int(res.headers['X-MBX-USED-WEIGHT-1M'])
             #todo finish retry limit and status codes
-            
+
             # rate_remain = None
-            # try:                
+            # try:
             #     rate_remain = int(res.headers['X-MBX-ORDER-COUNT-1M'])
-            # except KeyError:             #             
+            # except KeyError:             #
             #     #return ret
             #     pass
             # if rate_remain is not None and rate_remain < 10:
@@ -228,6 +228,8 @@ def di_plus(high, low, close, period=14):
 def di_minus(high, low, close, period=14):
     return talib.MINUS_DI(high, low, close, period)
 
+def willr(high, low, close, period=14):
+    return talib.WILLR(high, low, close, period)
 
 def rsi(close, period=14):
     return talib.RSI(close, period)
@@ -278,6 +280,16 @@ def crossover(a, b):
 def crossunder(a, b):
     return a[-2] > b[-2] and a[-1] < b[-1]
 
+def over(a, b):
+    if a > b:
+        return True
+    return False
+
+
+def under(a, b):
+    if a < b:
+        return True
+    return False
 
 def ord(seq, sort_seq, idx, itv):
     p = seq[idx]
@@ -335,3 +347,97 @@ def is_over(src, value, p):
         if src[-i - 1] < value:
             return False
     return True
+
+def heikinashi(df, ohlc=['open', 'high', 'low', 'close']):
+    """
+    Function to compute Heiken Ashi Candles (HA)
+    Args :
+        df : Pandas DataFrame which contains ['date', 'open', 'high', 'low', 'close', 'volume'] columns
+        ohlc: List defining OHLC Column names (default ['Open', 'High', 'Low', 'Close'])
+    Returns :
+        df : Pandas DataFrame with new columns added for
+            Heiken Ashi Close (HA_$ohlc[3])
+            Heiken Ashi Open (HA_$ohlc[0])
+            Heiken Ashi High (HA_$ohlc[1])
+            Heiken Ashi Low (HA_$ohlc[2])
+    """
+
+    ha_open = 'HA_' + ohlc[0]
+    ha_high = 'HA_' + ohlc[1]
+    ha_low = 'HA_' + ohlc[2]
+    ha_close = 'HA_' + ohlc[3]
+
+    df[ha_close] = (df[ohlc[0]] + df[ohlc[1]] + df[ohlc[2]] + df[ohlc[3]]) / 4
+
+    df[ha_open] = 0.00
+    for i in range(0, len(df)):
+        if i == 0:
+            df[ha_open].iat[i] = (df[ohlc[0]].iat[i] + df[ohlc[3]].iat[i]) / 2
+        else:
+            df[ha_open].iat[i] = (df[ha_open].iat[i - 1] + df[ha_close].iat[i - 1]) / 2
+
+    df[ha_high] = df[[ha_open, ha_close, ohlc[1]]].max(axis=1)
+    df[ha_low] = df[[ha_open, ha_close, ohlc[2]]].min(axis=1)
+
+    return df
+
+def atr(high, low, close, period=14):
+    return talib.ATR(high, low, close, period)
+
+def supertrend(df, f, n): #df is the dataframe, n is the period, f is the factor; f=3, n=7 are commonly used.
+    #Calculation of ATR
+    pd.options.mode.chained_assignment = None
+    df['H-L']=abs(df['high']-df['low'])
+    df['H-PC']=abs(df['high']-df['close'].shift(1))
+    df['L-PC']=abs(df['low']-df['close'].shift(1))
+    df['TR']=df[['H-L','H-PC','L-PC']].max(axis=1)
+    df['ATR']=np.nan
+    df.ix[n-1,'ATR']=df['TR'][:n-1].mean() #.ix is deprecated from pandas verion- 0.19
+    for i in range(n,len(df)):
+        df['ATR'][i]=(df['ATR'][i-1]*(n-1)+ df['TR'][i])/n
+
+    #Calculation of SuperTrend
+    df['Upper Basic']=(df['high']+df['low'])/2+(f*df['ATR'])
+    df['Lower Basic']=(df['high']+df['low'])/2-(f*df['ATR'])
+    df['Upper Band']=df['Upper Basic']
+    df['Lower Band']=df['Lower Basic']
+    df['Trend']=True  # Up(case of Bull or Long)-> True, Dn-> False
+    df['TSL']=None  # Trailing Stop Loss Value
+    for i in range(n,len(df)):
+        if df['close'][i-1]<=df['Upper Band'][i-1]:
+            df['Upper Band'][i]=min(df['Upper Basic'][i],df['Upper Band'][i-1])
+        else:
+            df['Upper Band'][i]=df['Upper Basic'][i]
+    for i in range(n,len(df)):
+        if df['close'][i-1]>=df['Lower Band'][i-1]:
+            df['Lower Band'][i]=max(df['Lower Basic'][i],df['Lower Band'][i-1])
+        else:
+            df['Lower Band'][i]=df['Lower Basic'][i]
+    df['SuperTrend']=np.nan
+    for i in df['SuperTrend']:
+        if df['close'][n-1]<=df['Upper Band'][n-1]:
+            df['SuperTrend'][n-1]=df['Upper Band'][n-1]
+            df['Trend'][n-1]=False
+            df['TSL'][n-1]=df['Upper Band'][n-1]
+        elif df['close'][n-1]>df['Upper Band'][i]:
+            df['SuperTrend'][n-1]=df['Lower Band'][n-1]
+            df['Trend'][n-1]=True
+            df['TSL'][n-1]=df['Lower Band'][n-1]
+    for i in range(n,len(df)):
+        if df['SuperTrend'][i-1]==df['Upper Band'][i-1] and df['close'][i]<=df['Upper Band'][i]:
+            df['SuperTrend'][i]=df['Upper Band'][i]
+            df['Trend'][i]=False
+            df['TSL'][i]=df['Upper Band'][i]
+        elif  df['SuperTrend'][i-1]==df['Upper Band'][i-1] and df['close'][i]>=df['Upper Band'][i]:
+            df['SuperTrend'][i]=df['Lower Band'][i]
+            df['Trend'][i]=True
+            df['TSL'][i]=df['Lower Band'][i]
+        elif df['SuperTrend'][i-1]==df['Lower Band'][i-1] and df['close'][i]>=df['Lower Band'][i]:
+            df['SuperTrend'][i]=df['Lower Band'][i]
+            df['Trend'][i]=True
+            df['TSL'][i]=df['Lower Band'][i]
+        elif df['SuperTrend'][i-1]==df['Lower Band'][i-1] and df['close'][i]<=df['Lower Band'][i]:
+            df['SuperTrend'][i]=df['Upper Band'][i]
+            df['Trend'][i]=False
+            df['TSL'][i]=df['Upper Band'][i]
+    return df

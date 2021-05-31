@@ -142,20 +142,25 @@ class BinanceFutures:
         :return:
         """
         self.__init_client()
-        return float(self.get_margin()[0]["balance"])
+        return float(self.get_margin()["balance"])
 
-    def get_margin(self):
+    def get_margin(self, asset='USDT'):
         """
         get margin
         :return:
         """
         self.__init_client()
-        if self.margin is not None:
-            return self.margin
-        else:  # when the WebSocket cant get it
-            self.margin = retry(lambda: self.client
-                                .futures_account_balance_v2())
-            return self.margin
+
+        # if self.margin is not None:
+        #     return self.margin[0]
+        # else:  # when the WebSocket cant get it
+        ret = retry(lambda: self.client
+                            .futures_account_balance_v2())
+        if len(ret) > 0:
+            self.margin = [m for m in ret if m['asset'] == asset]
+            return self.margin[0]
+        else:
+            return None
 
     def get_leverage(self):
         """
@@ -269,11 +274,12 @@ class BinanceFutures:
         """
         cancel all orders
         """
-        self.__init_client()
-        res = retry(
-            lambda: self.client.futures_cancel_all_open_orders(symbol=self.pair))
-        # for order in orders:
-        logger.info(f"Cancel all open orders: {res}")
+        if not eval(os.environ.get('BOT_TEST', 'False')):
+            self.__init_client()
+            res = retry(
+                lambda: self.client.futures_cancel_all_open_orders(symbol=self.pair))
+            # for order in orders:
+            logger.info(f"Cancel all open orders: {res}")
 
     def close_all(self):
         """
@@ -315,6 +321,14 @@ class BinanceFutures:
                     f"({order['clientOrderId']}, {order['type']}, {order['side']}, {order['origQty']}, "
                     f"{order['price']}, {order['stopPrice']})")
         return True
+
+    def cancel_orders_by_side(self, side):
+        orders = self.get_all_open_orders()
+        if orders is not None:
+            orders = [o for o in orders if o["side"] == side]
+            for o in orders: self.cancel(str(o['clientOrderId']))
+        else:
+            return
 
     def __new_order(self, ord_id, side, ord_qty, limit=0, stop=0, post_only=False, reduce_only=False, trailing_stop=0, activationPrice=0):
         """
@@ -442,11 +456,14 @@ class BinanceFutures:
         # if self.get_margin()['excessMargin'] <= 0 or qty <= 0:
         #     return
 
+        # if round((limit * qty) / 20, 2) > round(float(self.get_margin()['availableBalance']), 2):
+        #     return
+
         if not when:
             return
 
         pos_size = self.get_position_size()
-        logger.info(f"pos_size: {pos_size}")
+        # logger.info(f"pos_size: {pos_size}")
 
         if long and pos_size > 0:
             return
@@ -454,7 +471,7 @@ class BinanceFutures:
         if not long and pos_size < 0:
             return
 
-        ord_qty = qty + abs(pos_size)
+        ord_qty = round(qty + abs(pos_size), int(os.environ.get('BOT_DECIMAL_NUM', 3)))
 
         trailing_stop = 0
         activationPrice = 0
@@ -701,7 +718,7 @@ class BinanceFutures:
             return
         # tp
         tp_order = self.get_open_order('TP')
-        logger.info(f"tp_order: {tp_order}")
+        # logger.info(f"tp_order: {tp_order}")
 
         is_tp_full_size = False
         is_sl_full_size = False
@@ -714,8 +731,8 @@ class BinanceFutures:
         tp_percent_long = self.get_sltp_values()['profit_long']
         tp_percent_short = self.get_sltp_values()['profit_short']
 
-        logger.info(f"TPL: {tp_percent_long}")
-        logger.info(f"TPS: {tp_percent_short}")
+        # logger.info(f"TPL: {tp_percent_long}")
+        # logger.info(f"TPS: {tp_percent_short}")
 
         avg_entry = self.get_position_avg_price()
 
@@ -802,9 +819,11 @@ class BinanceFutures:
         while True:
             if left_time > right_time:
                 break
-            logger.info(f"fetching OHLCV data")
+
             left_time_to_timestamp = int(datetime.timestamp(left_time)*1000)
             right_time_to_timestamp = int(datetime.timestamp(right_time)*1000)
+
+            logger.info(f"Fetching OHLCV data - {left_time}")
 
             source = retry(lambda: self.client.futures_klines(symbol=self.pair, interval=fetch_bin_size,
                                                               startTime=left_time_to_timestamp, endTime=right_time_to_timestamp,
@@ -966,10 +985,10 @@ class BinanceFutures:
                 self.set_trail_price(self.market_price)
 
             if is_update_pos_size:
-                logger.info(f"Updated Position\n"
-                            f"Price: {self.position[0]['entryPrice']} => {position[0]['ep']}\n"
-                            f"Qty: {self.position[0]['positionAmt']} => {position[0]['pa']}\n"
-                            f"Balance: {self.get_balance()} USDT")
+                logger.info(f"Updated Position")
+                logger.info(f"Price: {self.position[0]['entryPrice']} => {position[0]['ep']}")
+                logger.info(f"Qty: {self.position[0]['positionAmt']} => {position[0]['pa']}")
+                logger.info(f"Balance: {self.get_balance()} USDT")
                 notify(f"Updated Position\n"
                        f"Price: {self.position[0]['entryPrice']} => {position[0]['ep']}\n"
                        f"Qty: {self.position[0]['positionAmt']} => {position[0]['pa']}\n"
@@ -982,7 +1001,7 @@ class BinanceFutures:
                 "symbol": position[0]['s'],
                 "unRealizedProfit":  position[0]['up'],
                 "positionSide": position[0]['ps'],
-            } if self.position is not None else self.position
+            } if self.position is not None else self.position[0]
 
             self.position_size = float(self.position[0]['positionAmt'])
             self.entry_price = float(self.position[0]['entryPrice'])
@@ -1038,8 +1057,9 @@ class BinanceFutures:
         """
         Stop the crawler
         """
-        self.is_running = False
-        self.ws.close()
+        if self.is_running:
+            self.is_running = False
+            self.ws.close()
 
     def show_result(self):
         """

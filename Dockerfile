@@ -9,7 +9,8 @@ RUN apt-get update && apt-get install -y \
     pkg-config \
     libx11-dev \
     libatlas-base-dev \
-    libgtk-3-dev
+    libgtk-3-dev \
+    && rm -rf /var/lib/apt/lists/*
 
 RUN cd /tmp && \
     wget -O ta-lib.tar.gz http://prdownloads.sourceforge.net/ta-lib/ta-lib-0.4.0-src.tar.gz && \
