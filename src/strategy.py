@@ -501,13 +501,12 @@ class YYY(Bot):
 
         nc = 'golden' if round(fast_sma[-1] - slow_sma[-1], self.price_decimal_num) < 0 else 'dead'
         ct = 'sideways' if downtrend and uptrend else ('down' if downtrend else 'up')
-        cp = 'long' if pos_size > 0 else 'short'
 
         np = 'short' if nc == 'golden' and pos_size > 0 else 'long'
 
         logger.info(f'--------------------------------------')
         logger.info(f'trend: {ct}')
-        logger.info(f'next cross: {nc} > {np} > {lot} @ {calc_entry_price(price, False, self.price_decimal_num) if np == "short" else calc_entry_price(price, True, self.price_decimal_num)}')
+        logger.info(f'next cross: {nc if (nc == "golden" and np == "short") or (nc == "dead" and np == "long") else nc + "(Skipping)" } > {np} > {lot} @ {calc_entry_price(price, False, self.price_decimal_num) if np == "short" else calc_entry_price(price, True, self.price_decimal_num)}')
         if (trend_sma[-1] != trend_sma[-1] or trend_sma[-3] != trend_sma[-3] or trend_sma[-10] != trend_sma[-10]):
             logger.info(f'--------------------------------------')
             logger.info(f'Bot status: NEEDS RESTART')
