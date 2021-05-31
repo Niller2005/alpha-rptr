@@ -502,7 +502,7 @@ class YYY(Bot):
         nc = 'golden' if round(fast_sma[-1] - slow_sma[-1], self.price_decimal_num) < 0 else 'dead'
         ct = 'sideways' if downtrend and uptrend else ('down' if downtrend else 'up')
 
-        np = 'short' if nc == 'golden' and pos_size >= 0 else 'long'
+        np = 'short' if nc == 'golden' and (pos_size > 0 or (pos_size >= 0 and downtrend)) else 'long'
 
         logger.info(f'--------------------------------------')
         logger.info(f'trend: {ct}')
