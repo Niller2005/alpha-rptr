@@ -480,7 +480,7 @@ class YYY(Bot):
 
     def strategy(self, open, close, high, low, volume):
         lot = self.exchange.get_lot()
-        lot = int(round(lot/10, self.decimal_num))
+        lot = int(round(lot/6, self.decimal_num))
 
         price = self.exchange.get_market_price()
         pos_size = self.exchange.get_position_size()
@@ -547,7 +547,7 @@ class Heikinashi(Bot):
     def strategy(self, open, close, high, low, volume):
 
         lot = self.exchange.get_lot()
-        lot = int(round(lot/10, self.decimal_num))
+        lot = int(round(lot/6, self.decimal_num))
 
         resolution = self.input(defval=1, title="resolution", type=int)
         variant_type = self.input(defval=5, title="variant_type", type=int)
@@ -630,8 +630,8 @@ class Will_Rci(Bot):
     def strategy(self, open, close, high, low, volume):
         # logger.info('strategy start ctime : %s' % time.ctime())
         # start = time.time()  # 시작 시간 저장
-        # lot = self.exchange.get_lot()
-        lot = 100
+        lot = self.exchange.get_lot()
+        # lot = 100
         itv_s = self.input('rcv_short_len', int, 21)
         itv_m = self.input('rcv_medium_len', int, 34)
         itv_l = self.input('rcv_long_len', int, 55)
@@ -651,21 +651,14 @@ class Will_Rci(Bot):
         x = willr(high, low, close, period=4181)
         y = willr(high, low, close, period=6785)
 
-        # logger.info('---- a ----')
-        # for i in range(1, 5):
-        #     logger.info('a [%s] *******: %s' % (-i, a[-i]))
-        # logger.info('---- b ----')
-        # for i in range(1, 5):
-        #     logger.info('b [%s] *******: %s' % (-i, b[-i]))
-        # logger.info('---- c ----')
-        # for i in range(1, 5):
-        #     logger.info('c [%s] *******: %s' % (-i, c[-i]))
-        # logger.info('---- x ----')
-        # for i in range(1, 5):
-        #     logger.info('x [%s] *******: %s' % (-i, x[-i]))
-        # logger.info('---- y ----')
-        # for i in range(1, 5):
-        #     logger.info('x [%s] *******: %s' % (-i, y[-i]))
+        logger.info(f'--------------------------------------')
+
+        logger.info(f'a:  {round(a[-1], 2)}')
+        logger.info(f'b:  {round(b[-1], 2)}')
+        logger.info(f'c:  {round(c[-1], 2)}')
+        logger.info(f'x:  {round(x[-1], 2)}')
+        logger.info(f'x:  {round(y[-1], 2)}')
+        logger.info(f'rc: {round(rc, 2)}')
 
         logger.info(f'--------------------------------------')
 
@@ -680,6 +673,7 @@ class Will_Rci(Bot):
         buycon9 = True if a[-1] < -97 and b[-1] < -97 and c[-1] > -50 else False
 
         logger.info(f"WILLR Buy conditions: {sum([buycon1, buycon2, buycon3, buycon4, buycon5, buycon6, buycon7, buycon8, buycon9])}/9")
+        print([buycon1, buycon2, buycon3, buycon4, buycon5, buycon6, buycon7, buycon8, buycon9])
 
         sellcon1 = True if (a[-1] > -3 and (b[-1] > -3 or c[-1] > -3) and (x[-1] > -20 or y[-1] > -20)) else False
         sellcon2 = True if (a[-1] > -3 and (b[-1] > -3 and c[-1] > -10) and (x[-1] < -65 or y[-1] < -65)) else False
@@ -692,6 +686,7 @@ class Will_Rci(Bot):
         sellcon9 = True if a[-1] > -3 and b[-1] > -3 and c[-1] < -50 else False
 
         logger.info(f"WILLR Sell conditions: {sum([sellcon1, sellcon2, sellcon3, sellcon4, sellcon5, sellcon6, sellcon7, sellcon8, sellcon9])}/9")
+        print([sellcon1, sellcon2, sellcon3, sellcon4, sellcon5, sellcon6, sellcon7, sellcon8, sellcon9])
 
         buyRCIfillerCon = True if rc < -80 else False
         sellRCIfillerCon = True if rc > -20 else False
@@ -708,6 +703,8 @@ class Will_Rci(Bot):
 
         buyCon = True if buyCons else False
         sellCon = True if sellCons else False
+
+        logger.info(f"{[buyCon, sellCon]}")
 
 
         # buyCloseCon = sellRCIfillerCon
