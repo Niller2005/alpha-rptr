@@ -34,7 +34,7 @@ def get_calc_lot(lot, decimal_num: int, leverage: float, actual_leverage: float)
 
 def calc_entry_price(price, long, price_decimals=2):
     if long:
-        return round(price-(0.1/100*price), price_decimals)
+        return round(price - (0.1 / 100 * price), price_decimals)
     else:
         return round(price + (0.1 / 100 * price), price_decimals)
 
@@ -480,7 +480,7 @@ class YYY(Bot):
 
     def strategy(self, open, close, high, low, volume):
         lot = self.exchange.get_lot()
-        lot = round(lot*0.2, self.decimal_num)
+        lot = int(round(lot/10, self.decimal_num))
 
         price = self.exchange.get_market_price()
         pos_size = self.exchange.get_position_size()
@@ -500,10 +500,10 @@ class YYY(Bot):
         dead_cross = crossunder(fast_sma, slow_sma)
 
         nc = 'golden' if round(fast_sma[-1] - slow_sma[-1], self.price_decimal_num) < 0 else 'dead'
-        ct = 'down' if downtrend else ('sideways' if downtrend and uptrend else 'up')
+        ct = 'sideways' if downtrend and uptrend else ('down' if downtrend else 'up')
         cp = 'long' if pos_size > 0 else 'short'
 
-        np = 'short' if nc == 'golden' and (downtrend or not cp == 'short') else ('long' if nc == 'dead' and (uptrend or not cp == 'long') else 'short')
+        np = 'short' if nc == 'golden' and pos_size > 0 else 'long'
 
         logger.info(f'--------------------------------------')
         logger.info(f'trend: {ct}')
@@ -522,12 +522,12 @@ class YYY(Bot):
                 logger.info('in dead_cross and uptrend for long')
 
             if float(self.exchange.get_position()['notional']) > 0.0:
-                self.exchange.order("Long", False, abs(pos_size), limit=calc_entry_price(price, False, self.price_decimal_num), stop=(calc_entry_price(price, False, self.price_decimal_num)), when=golden_cross, post_only=True)
+                self.exchange.order("Long", False, lot, limit=calc_entry_price(price, False, self.price_decimal_num), when=golden_cross, post_only=True)
 
             if golden_cross and downtrend:
                 # self.exchange.cancel_orders_by_side('SELL')
-                self.exchange.order("Short", False, lot, limit=calc_entry_price(price, False, self.price_decimal_num), when=True, post_only=True)
+                self.exchange.entry("Short", False, lot, limit=calc_entry_price(price, False, self.price_decimal_num), when=True, post_only=True)
                 logger.info('in golden_cross and downtrend for short')
 
             if float(self.exchange.get_position()['notional']) < 0.0:
-                self.exchange.order("Short", True, abs(pos_size), limit=calc_entry_price(price, True, self.price_decimal_num), stop=(calc_entry_price(price, True, self.price_decimal_num)), when=dead_cross, post_only=True)
+                self.exchange.order("Short", True, lot, limit=calc_entry_price(price, True, self.price_decimal_num), stop=(calc_entry_price(price, True, self.price_decimal_num)), when=dead_cross, post_only=True)
