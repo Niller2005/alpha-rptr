@@ -631,7 +631,8 @@ class Will_Rci(Bot):
         # logger.info('strategy start ctime : %s' % time.ctime())
         # start = time.time()  # 시작 시간 저장
         lot = self.exchange.get_lot()
-        # lot = 100
+        lot = round(lot*0.9, self.decimal_num)
+        
         itv_s = self.input('rcv_short_len', int, 21)
         itv_m = self.input('rcv_medium_len', int, 34)
         itv_l = self.input('rcv_long_len', int, 55)
@@ -673,7 +674,7 @@ class Will_Rci(Bot):
         buycon9 = True if a[-1] < -97 and b[-1] < -97 and c[-1] > -50 else False
 
         logger.info(f"WILLR Buy conditions: {sum([buycon1, buycon2, buycon3, buycon4, buycon5, buycon6, buycon7, buycon8, buycon9])}/9")
-        print([buycon1, buycon2, buycon3, buycon4, buycon5, buycon6, buycon7, buycon8, buycon9])
+        # print([buycon1, buycon2, buycon3, buycon4, buycon5, buycon6, buycon7, buycon8, buycon9])
 
         sellcon1 = True if (a[-1] > -3 and (b[-1] > -3 or c[-1] > -3) and (x[-1] > -20 or y[-1] > -20)) else False
         sellcon2 = True if (a[-1] > -3 and (b[-1] > -3 and c[-1] > -10) and (x[-1] < -65 or y[-1] < -65)) else False
@@ -686,7 +687,7 @@ class Will_Rci(Bot):
         sellcon9 = True if a[-1] > -3 and b[-1] > -3 and c[-1] < -50 else False
 
         logger.info(f"WILLR Sell conditions: {sum([sellcon1, sellcon2, sellcon3, sellcon4, sellcon5, sellcon6, sellcon7, sellcon8, sellcon9])}/9")
-        print([sellcon1, sellcon2, sellcon3, sellcon4, sellcon5, sellcon6, sellcon7, sellcon8, sellcon9])
+        # print([sellcon1, sellcon2, sellcon3, sellcon4, sellcon5, sellcon6, sellcon7, sellcon8, sellcon9])
 
         buyRCIfillerCon = True if rc < -80 else False
         sellRCIfillerCon = True if rc > -20 else False
