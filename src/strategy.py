@@ -633,6 +633,9 @@ class Will_Rci(Bot):
         lot = self.exchange.get_lot()
         lot = round(lot*0.9, self.decimal_num)
         
+        logger.info(f'{lot+abs(self.exchange.get_position_size())}')
+        logger.info(f'{self.exchange.get_margin()}')
+
         itv_s = self.input('rcv_short_len', int, 21)
         itv_m = self.input('rcv_medium_len', int, 34)
         itv_l = self.input('rcv_long_len', int, 55)
@@ -654,12 +657,13 @@ class Will_Rci(Bot):
 
         logger.info(f'--------------------------------------')
 
-        logger.info(f'a:  {round(a[-1], 2)}')
-        logger.info(f'b:  {round(b[-1], 2)}')
-        logger.info(f'c:  {round(c[-1], 2)}')
-        logger.info(f'x:  {round(x[-1], 2)}')
-        logger.info(f'x:  {round(y[-1], 2)}')
-        logger.info(f'rc: {round(rc, 2)}')
+        logger.info(f'a:   {round(a[-1], 2)}')
+        logger.info(f'b:   {round(b[-1], 2)}')
+        logger.info(f'c:   {round(c[-1], 2)}')
+        logger.info(f'x:   {round(x[-1], 2)}')
+        logger.info(f'y:   {round(y[-1], 2)}')
+        logger.info(f'rc:  {round(rc, 2)}')
+        logger.info(f'lot: {round(lot, self.decimal_num)}')
 
         logger.info(f'--------------------------------------')
 
