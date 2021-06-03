@@ -631,10 +631,7 @@ class Will_Rci(Bot):
         # logger.info('strategy start ctime : %s' % time.ctime())
         # start = time.time()  # 시작 시간 저장
         lot = self.exchange.get_lot()
-        lot = round(lot*0.9, self.decimal_num)
-        
-        logger.info(f'{lot+abs(self.exchange.get_position_size())}')
-        logger.info(f'{self.exchange.get_margin()}')
+        lot = round(lot*0.75, self.decimal_num)
 
         itv_s = self.input('rcv_short_len', int, 21)
         itv_m = self.input('rcv_medium_len', int, 34)
@@ -655,6 +652,67 @@ class Will_Rci(Bot):
         x = willr(high, low, close, period=4181)
         y = willr(high, low, close, period=6785)
 
+        buycon1 = True if (a[-1] < -97 and (b[-1] < -97 or c[-1] < -97) and (x[-1] < -80 or y[-1] < -80)) else False
+        buycon2 = True if (a[-1] < -97 and (b[-1] < -97 and c[-1] < -90) and (x[-1] > -35 or y[-1] > -35)) else False
+        buycon3 = True if (a[-1] < -97 and (b[-1] < -97 and c[-1] > -70) and (x[-1] > -50 or y[-1] > -25)) else False
+        buycon4 = True if (a[-1] < -97 and (b[-1] < -97 and c[-1] < -97) and (x[-1] > -50 or y[-1] > -50)) else False
+        buycon5 = True if (a[-1] < -97 and (b[-1] < -97 and c[-1] < -75) and (x[-1] > -25 or y[-1] > -25)) else False
+        buycon6 = True if ((b[-1] + 100) * (c[-1] + 100) == 0 and (c[-1] < -75 and x[-1] > -30 or y[-1] > -30)) else False
+        buycon7 = True if ((b[-1] + 100) == 0 and (c[-1] > -30 and x[-1] > -30 or y[-1] > -30)) else False
+        buycon8 = True if c[-1] < -97 else False
+        buycon9 = True if a[-1] < -97 and b[-1] < -97 and c[-1] > -50 else False
+
+        sellcon1 = True if (a[-1] > -3 and (b[-1] > -3 or c[-1] > -3) and (x[-1] > -20 or y[-1] > -20)) else False
+        sellcon2 = True if (a[-1] > -3 and (b[-1] > -3 and c[-1] > -10) and (x[-1] < -65 or y[-1] < -65)) else False
+        sellcon3 = True if (a[-1] > -3 and (b[-1] > -3 and c[-1] < -30) and (x[-1] < -50 or y[-1] < -75)) else False
+        sellcon4 = True if (a[-1] > -3 and (b[-1] > -3 and c[-1] > -3) and (x[-1] < -50 or y[-1] < -50)) else False
+        sellcon5 = True if (a[-1] > -3 and (b[-1] > -3 and c[-1] < -25) and (x[-1] < -75 or y[-1] < -75)) else False
+        sellcon6 = True if (((b[-1]) * (c[-1])) == 0 and c[-1] > -25 and (x[-1] < -70 or y[-1] < -70)) else False
+        sellcon7 = True if ((b[-1]) == 0 and (c[-1] < -70 and x[-1] < -70 or y[-1] < -70)) else False
+        sellcon8 = True if c[-1] > -3 else False
+        sellcon9 = True if a[-1] > -3 and b[-1] > -3 and c[-1] < -50 else False
+
+        buyRCIfillerCon = True if rc < -80 else False
+        sellRCIfillerCon = True if rc > -20 else False
+
+        buyWillfilterCon = buycon1 or buycon2 or buycon3 or buycon4 or buycon5 or buycon6 or buycon7 or buycon8 or buycon9
+        sellWillFilrerCon = sellcon1 or sellcon2 or sellcon3 or sellcon4 or sellcon5 or sellcon6 or sellcon7 or sellcon8 or sellcon9
+
+        # set condition
+        buyCons = buyWillfilterCon and buyRCIfillerCon
+        sellCons = sellWillFilrerCon and sellRCIfillerCon
+
+        buyCon = True if buyCons else False
+        sellCon = True if sellCons else False
+
+
+
+        # buyCloseCon = sellRCIfillerCon
+        buyCloseCon = sellWillFilrerCon
+
+        # sellCloseCon = buyRCIfillerCon
+        sellCloseCon = buyWillfilterCon
+
+
+        if not eval(os.environ.get('BOT_TEST', 'False')):
+            # if buyCon:
+            #     self.exchange.entry("Long", True, lot)
+            # if sellCon:
+            #     self.exchange.entry("Short", False, lot)
+
+            if buyCon:
+                self.exchange.entry("Long", True, lot)
+                self.inlong = True
+            if buyCloseCon and self.inlong:
+                self.exchange.close_all()
+                self.inlong = False
+            if sellCon:
+                self.exchange.entry("Short", False, lot)
+                self.inshort = True
+            if sellCloseCon and self.inlong:
+                self.exchange.close_all()
+                self.inshort = False
+
         logger.info(f'--------------------------------------')
 
         logger.info(f'a:   {round(a[-1], 2)}')
@@ -667,74 +725,16 @@ class Will_Rci(Bot):
 
         logger.info(f'--------------------------------------')
 
-        buycon1 = True if (a[-1] < -97 and (b[-1] < -97 or c[-1] < -97) and (x[-1] < -80 or y[-1] < -80)) else False
-        buycon2 = True if (a[-1] < -97 and (b[-1] < -97 and c[-1] < -90) and (x[-1] > -35 or y[-1] > -35)) else False
-        buycon3 = True if (a[-1] < -97 and (b[-1] < -97 and c[-1] > -70) and (x[-1] > -50 or y[-1] > -25)) else False
-        buycon4 = True if (a[-1] < -97 and (b[-1] < -97 and c[-1] < -97) and (x[-1] > -50 or y[-1] > -50)) else False
-        buycon5 = True if (a[-1] < -97 and (b[-1] < -97 and c[-1] < -75) and (x[-1] > -25 or y[-1] > -25)) else False
-        buycon6 = True if ((b[-1] + 100) * (c[-1] + 100) == 0 and (c[-1] < -75 and x[-1] > -30 or y[-1] > -30)) else False
-        buycon7 = True if ((b[-1] + 100) == 0 and (c[-1] > -30 and x[-1] > -30 or y[-1] > -30)) else False
-        buycon8 = True if c[-1] < -97 else False
-        buycon9 = True if a[-1] < -97 and b[-1] < -97 and c[-1] > -50 else False
-
         logger.info(f"WILLR Buy conditions: {sum([buycon1, buycon2, buycon3, buycon4, buycon5, buycon6, buycon7, buycon8, buycon9])}/9")
         # print([buycon1, buycon2, buycon3, buycon4, buycon5, buycon6, buycon7, buycon8, buycon9])
-
-        sellcon1 = True if (a[-1] > -3 and (b[-1] > -3 or c[-1] > -3) and (x[-1] > -20 or y[-1] > -20)) else False
-        sellcon2 = True if (a[-1] > -3 and (b[-1] > -3 and c[-1] > -10) and (x[-1] < -65 or y[-1] < -65)) else False
-        sellcon3 = True if (a[-1] > -3 and (b[-1] > -3 and c[-1] < -30) and (x[-1] < -50 or y[-1] < -75)) else False
-        sellcon4 = True if (a[-1] > -3 and (b[-1] > -3 and c[-1] > -3) and (x[-1] < -50 or y[-1] < -50)) else False
-        sellcon5 = True if (a[-1] > -3 and (b[-1] > -3 and c[-1] < -25) and (x[-1] < -75 or y[-1] < -75)) else False
-        sellcon6 = True if (((b[-1]) * (c[-1])) == 0 and c[-1] > -25 and (x[-1] < -70 or y[-1] < -70)) else False
-        sellcon7 = True if ((b[-1]) == 0 and (c[-1] < -70 and x[-1] < -70 or y[-1] < -70)) else False
-        sellcon8 = True if c[-1] > -3 else False
-        sellcon9 = True if a[-1] > -3 and b[-1] > -3 and c[-1] < -50 else False
 
         logger.info(f"WILLR Sell conditions: {sum([sellcon1, sellcon2, sellcon3, sellcon4, sellcon5, sellcon6, sellcon7, sellcon8, sellcon9])}/9")
         # print([sellcon1, sellcon2, sellcon3, sellcon4, sellcon5, sellcon6, sellcon7, sellcon8, sellcon9])
 
-        buyRCIfillerCon = True if rc < -80 else False
-        sellRCIfillerCon = True if rc > -20 else False
-
         logger.info(f"RCI Buy conditions: {buyRCIfillerCon}")
         logger.info(f"RCI Sell conditions: {sellRCIfillerCon}")
-
-        buyWillfilterCon = buycon1 or buycon2 or buycon3 or buycon4 or buycon5 or buycon6 or buycon7 or buycon8 or buycon9
-        sellWillFilrerCon = sellcon1 or sellcon2 or sellcon3 or sellcon4 or sellcon5 or sellcon6 or sellcon7 or sellcon8 or sellcon9
-
-        # set condition
-        buyCons = buyWillfilterCon and buyRCIfillerCon
-        sellCons = sellWillFilrerCon and sellRCIfillerCon
-
-        buyCon = True if buyCons else False
-        sellCon = True if sellCons else False
-
-        logger.info(f"{[buyCon, sellCon]}")
+        logger.info(f"In {'long' if self.inlong else ('short' if self.inshort else 'none')}")
 
 
-        # buyCloseCon = sellRCIfillerCon
-        buyCloseCon = sellWillFilrerCon
 
-        # sellCloseCon = buyRCIfillerCon
-        sellCloseCon = buyWillfilterCon
-
-
-        if not eval(os.environ.get('BOT_TEST', 'False')):
-            if buyCon:
-                self.exchange.entry("Long", True, lot)
-            if sellCon:
-                self.exchange.entry("Short", False, lot)
-
-        # if buyCon:
-        #     self.exchange.entry("Long", True, lot)
-        #     self.inlong = True
-        # if buyCloseCon and self.inlong:
-        #     self.exchange.close_all()
-        #     self.inlong = False
-        # if sellCon:
-        #     self.exchange.entry("Short", False, lot)
-        #     self.inshort = True
-        # if sellCloseCon and self.inlong:
-        #     self.exchange.close_all()
-        #     self.inshort = False
         # logger.info('all strategy processing time : %s' % str(time.time() - start))
