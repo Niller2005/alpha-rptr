@@ -706,10 +706,11 @@ class Will_Rci(Bot):
             if buyCloseCon and self.inlong:
                 self.exchange.close_all()
                 self.inlong = False
+
             if sellCon:
                 self.exchange.entry("Short", False, lot)
                 self.inshort = True
-            if sellCloseCon and self.inlong:
+            if sellCloseCon and self.inshort:
                 self.exchange.close_all()
                 self.inshort = False
 
@@ -721,7 +722,7 @@ class Will_Rci(Bot):
         logger.info(f'x:   {round(x[-1], 2)}')
         logger.info(f'y:   {round(y[-1], 2)}')
         logger.info(f'rc:  {round(rc, 2)}')
-        logger.info(f'lot: {round(lot, self.decimal_num)}')
+        logger.info(f'lot: {round(lot, self.decimal_num)} ({round(lot + self.exchange.get_position_size(), self.decimal_num)})')
 
         logger.info(f'--------------------------------------')
 
