@@ -611,6 +611,7 @@ class Will_Rci(Bot):
     inlong = False
     inshort = False
 
+
     decimal_num = int(os.environ.get('BOT_DECIMAL_NUM', 3))
     price_decimal_num = int(os.environ.get('BOT_PRICE_DECIMAL_NUM', 2))
 
@@ -632,6 +633,8 @@ class Will_Rci(Bot):
         # start = time.time()  # 시작 시간 저장
         lot = self.exchange.get_lot()
         lot = round(lot*0.75, self.decimal_num)
+
+        pos_size = self.exchange.get_position_size()
 
         itv_s = self.input('rcv_short_len', int, 21)
         itv_m = self.input('rcv_medium_len', int, 34)
@@ -702,17 +705,17 @@ class Will_Rci(Bot):
 
             if buyCon:
                 self.exchange.entry("Long", True, lot)
-                self.inlong = True
-            if buyCloseCon and self.inlong:
+                # self.inlong = True
+            if buyCloseCon and pos_size > 0:
                 self.exchange.close_all()
-                self.inlong = False
+                # self.inlong = False
 
             if sellCon:
                 self.exchange.entry("Short", False, lot)
-                self.inshort = True
-            if sellCloseCon and self.inshort:
+                # self.inshort = True
+            if sellCloseCon and pos_size < 0:
                 self.exchange.close_all()
-                self.inshort = False
+                # self.inshort = False
 
         logger.info(f'--------------------------------------')
 
@@ -722,7 +725,7 @@ class Will_Rci(Bot):
         logger.info(f'x:   {round(x[-1], 2)}')
         logger.info(f'y:   {round(y[-1], 2)}')
         logger.info(f'rc:  {round(rc, 2)}')
-        logger.info(f'lot: {round(lot, self.decimal_num)} ({round(lot + self.exchange.get_position_size(), self.decimal_num)})')
+        logger.info(f'lot: {round(lot, self.decimal_num)} ({round(lot + pos_size, self.decimal_num)})')
 
         logger.info(f'--------------------------------------')
 
@@ -734,7 +737,7 @@ class Will_Rci(Bot):
 
         logger.info(f"RCI Buy conditions: {buyRCIfillerCon}")
         logger.info(f"RCI Sell conditions: {sellRCIfillerCon}")
-        logger.info(f"In {'long' if self.inlong else ('short' if self.inshort else 'none')}")
+        logger.info(f"In {'LONG' if pos_size > 0 else ('SHORT' if pos_size < 0 else 'no')} position")
 
 
 
