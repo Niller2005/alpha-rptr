@@ -632,7 +632,7 @@ class Will_Rci(Bot):
         # logger.info('strategy start ctime : %s' % time.ctime())
         # start = time.time()  # 시작 시간 저장
         lot = self.exchange.get_lot()
-        lot = round(lot*0.75, self.decimal_num)
+        lot = round(lot/5, self.decimal_num)
 
         pos_size = self.exchange.get_position_size()
 
@@ -725,7 +725,7 @@ class Will_Rci(Bot):
         logger.info(f'x:   {round(x[-1], 2)}')
         logger.info(f'y:   {round(y[-1], 2)}')
         logger.info(f'rc:  {round(rc, 2)}')
-        logger.info(f'lot: {round(lot, self.decimal_num)} ({round(lot + pos_size, self.decimal_num)})')
+        logger.info(f'lot: {round(lot, self.decimal_num)} ({round(lot + abs(pos_size), self.decimal_num)})')
 
         logger.info(f'--------------------------------------')
 
