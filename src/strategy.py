@@ -703,6 +703,9 @@ class Will_Rci(Bot):
             # if sellCon:
             #     self.exchange.entry("Short", False, lot)
 
+            if round(float(self.exchange.get_position()["unRealizedProfit"]), 5) >= round(float(self.exchange.get_balance()) / 10, 5):
+                self.exchange.close_all()
+
             if buyCon:
                 self.exchange.entry("Long", True, lot)
                 # self.inlong = True
@@ -730,14 +733,13 @@ class Will_Rci(Bot):
         logger.info(f'--------------------------------------')
 
         logger.info(f"WILLR Buy conditions: {sum([buycon1, buycon2, buycon3, buycon4, buycon5, buycon6, buycon7, buycon8, buycon9])}/9")
-        # print([buycon1, buycon2, buycon3, buycon4, buycon5, buycon6, buycon7, buycon8, buycon9])
-
         logger.info(f"WILLR Sell conditions: {sum([sellcon1, sellcon2, sellcon3, sellcon4, sellcon5, sellcon6, sellcon7, sellcon8, sellcon9])}/9")
-        # print([sellcon1, sellcon2, sellcon3, sellcon4, sellcon5, sellcon6, sellcon7, sellcon8, sellcon9])
 
         logger.info(f"RCI Buy conditions: {buyRCIfillerCon}")
         logger.info(f"RCI Sell conditions: {sellRCIfillerCon}")
         logger.info(f"In {'LONG' if pos_size > 0 else ('SHORT' if pos_size < 0 else 'no')} position")
+        if pos_size != 0:
+            logger.info(f'{round(float(self.exchange.get_position()["unRealizedProfit"]), 5)} / {round(float(self.exchange.get_balance()) / 10, 5)}')
 
 
 
