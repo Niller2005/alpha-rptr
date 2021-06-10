@@ -614,6 +614,8 @@ class Will_Rci(Bot):
 
     decimal_num = int(os.environ.get('BOT_DECIMAL_NUM', 3))
     price_decimal_num = int(os.environ.get('BOT_PRICE_DECIMAL_NUM', 2))
+    lot_percent = 100 / int(os.environ.get('BOT_LOT_PERCENT', 10))
+    take_profit_percent = 100 / int(os.environ.get('BOT_TAKE_PROFIT_PERCENT', 50))
 
     def __init__(self):
         Bot.__init__(self, '1m')
@@ -632,7 +634,7 @@ class Will_Rci(Bot):
         # logger.info('strategy start ctime : %s' % time.ctime())
         # start = time.time()  # 시작 시간 저장
         lot = self.exchange.get_lot()
-        lot = round(lot/10, self.decimal_num)
+        lot = round(lot / self.lot_percent, self.decimal_num)
 
         pos_size = self.exchange.get_position_size()
 
@@ -698,27 +700,17 @@ class Will_Rci(Bot):
 
 
         if not eval(os.environ.get('BOT_TEST', 'False')):
-            # if buyCon:
-            #     self.exchange.entry("Long", True, lot)
-            # if sellCon:
-            #     self.exchange.entry("Short", False, lot)
-
-            if round(float(self.exchange.get_position()["unRealizedProfit"]), 5) >= round(float(self.exchange.get_balance()) / 10, 5):
-                self.exchange.close_all()
+            self.exchange.exit(profit=(float(self.exchange.get_balance()) / (100 / (self.lot_percent / self.take_profit_percent))))
 
             if buyCon:
                 self.exchange.entry("Long", True, lot)
-                # self.inlong = True
             if buyCloseCon and pos_size > 0:
                 self.exchange.close_all()
-                # self.inlong = False
 
             if sellCon:
                 self.exchange.entry("Short", False, lot)
-                # self.inshort = True
             if sellCloseCon and pos_size < 0:
                 self.exchange.close_all()
-                # self.inshort = False
 
         logger.info(f'--------------------------------------')
 
@@ -739,7 +731,7 @@ class Will_Rci(Bot):
         logger.info(f"RCI Sell conditions: {sellRCIfillerCon}")
         logger.info(f"In {'LONG' if pos_size > 0 else ('SHORT' if pos_size < 0 else 'no')} position")
         if pos_size != 0:
-            logger.info(f'{round(float(self.exchange.get_position()["unRealizedProfit"]), 5)} / {round(float(self.exchange.get_balance()) / 10, 5)}')
+            logger.info(f'{float(self.exchange.get_position()["unRealizedProfit"])} / {(float(self.exchange.get_balance()) / (100 / (self.lot_percent / self.take_profit_percent)))}')
 
 
 

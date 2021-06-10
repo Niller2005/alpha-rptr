@@ -713,7 +713,7 @@ class BinanceFutures:
 
         pos_size = float(self.get_position()['positionAmt'])
 
-        logger.info(f"pos_size: {pos_size}")
+        # logger.info(f"pos_size: {pos_size}")
         if pos_size == 0:
             return
         # tp
@@ -910,6 +910,7 @@ class BinanceFutures:
             if self.strategy is not None:
                 self.timestamp = re_sample_data.iloc[-1].name.isoformat()
                 self.strategy(open, close, high, low, volume)
+                self.eval_exit()
             self.last_action_time = re_sample_data.iloc[-1].name
         except FatalError as e:
             # Fatal error
