@@ -215,7 +215,25 @@ class BinanceFutures:
         position = self.get_position()
 
         if position['symbol'] == self.pair:
+            self.position_size = float(position['positionAmt'])
             return float(position['positionAmt'])
+        else:
+            return 0
+
+    def get_position_entry_price(self):
+        """
+        get current position entry prize.
+        :return:
+        """
+        self.__init_client()
+        if self.entry_price is not None:
+             return self.entry_price
+
+        position = self.get_position()
+
+        if position['symbol'] == self.pair:
+            self.entry_price = float(position['entryPrice'])
+            return float(position['entryPrice'])
         else:
             return 0
 

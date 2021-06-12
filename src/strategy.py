@@ -637,6 +637,7 @@ class Will_Rci(Bot):
         lot = round(lot / self.lot_percent, self.decimal_num)
 
         pos_size = self.exchange.get_position_size()
+        pos_margin = (abs(pos_size) * self.exchange.get_position_entry_price())/20
 
         itv_s = self.input('rcv_short_len', int, 21)
         itv_m = self.input('rcv_medium_len', int, 34)
@@ -700,7 +701,8 @@ class Will_Rci(Bot):
 
 
         if not eval(os.environ.get('BOT_TEST', 'False')):
-            self.exchange.exit(profit=(float(self.exchange.get_balance()) / (100 / (self.lot_percent / self.take_profit_percent))))
+            if pos_size != 0:
+                self.exchange.exit(profit=(float(pos_margin / self.take_profit_percent)))
 
             if buyCon:
                 self.exchange.entry("Long", True, lot)
@@ -731,7 +733,7 @@ class Will_Rci(Bot):
         logger.info(f"RCI Sell conditions: {sellRCIfillerCon}")
         logger.info(f"In {'LONG' if pos_size > 0 else ('SHORT' if pos_size < 0 else 'no')} position")
         if pos_size != 0:
-            logger.info(f'{float(self.exchange.get_position()["unRealizedProfit"])} / {(float(self.exchange.get_balance()) / (100 / (self.lot_percent / self.take_profit_percent)))}')
+            logger.info(f'{float(self.exchange.get_position()["unRealizedProfit"])} / {(pos_margin / self.take_profit_percent)}')
 
 
 
