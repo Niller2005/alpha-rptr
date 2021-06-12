@@ -701,8 +701,7 @@ class Will_Rci(Bot):
 
 
         if not eval(os.environ.get('BOT_TEST', 'False')):
-            if pos_size != 0:
-                self.exchange.exit(profit=(float(pos_margin / self.take_profit_percent)))
+            self.exchange.exit(profit=(float(pos_margin / self.take_profit_percent)))
 
             if buyCon:
                 self.exchange.entry("Long", True, lot)
