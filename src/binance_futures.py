@@ -311,6 +311,8 @@ class BinanceFutures:
         side = False if position_size > 0 else True
 
         self.order("Close", side, abs(position_size))
+        self.position_size = None
+
         position_size = self.get_position_size()
         if position_size == 0:
             logger.info(f"Closed {self.pair} position")
