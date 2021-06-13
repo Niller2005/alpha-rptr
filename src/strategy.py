@@ -638,6 +638,7 @@ class Will_Rci(Bot):
 
         pos_size = self.exchange.get_position_size()
         pos_margin = (abs(pos_size) * self.exchange.get_position_entry_price())/20
+        tp_order = self.exchange.get_open_order('TP')
 
         itv_s = self.input('rcv_short_len', int, 21)
         itv_m = self.input('rcv_medium_len', int, 34)
