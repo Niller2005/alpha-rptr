@@ -764,10 +764,9 @@ class Will_Rci(Bot):
                 if pos_size > 0:
                     self.exchange.order("TP", False, abs(pos_size), take_profit=round(self.exchange.get_position_entry_price() * ((1 / self.take_profit_percent) / 20 + 1), self.price_decimal_num), reduce_only=True)
 
-            if buyCloseCon and pos_size > 0:
+            if (buyCloseCon and pos_size > 0) or (sellCloseCon and pos_size < 0):
                 self.exchange.close_all()
-            if sellCloseCon and pos_size < 0:
-                self.exchange.close_all()
+                self.exchange.cancel_all()
 
             if buyCon and pos_size <= 0:
                 self.exchange.order("Long", True, lot)
