@@ -334,7 +334,7 @@ class BinanceFutures:
         else:
             return
 
-    def __new_order(self, ord_id, side, ord_qty, limit=0, stop=0, post_only=False, reduce_only=False, trailing_stop=0, activationPrice=0):
+    def __new_order(self, ord_id, side, ord_qty, limit=0, stop=0, take_profit=0, post_only=False, reduce_only=False, trailing_stop=0, activationPrice=0, close_position=False):
         """
         create an order
         """
@@ -365,6 +365,9 @@ class BinanceFutures:
         elif stop > 0 and reduce_only:
             ord_type = "STOP_MARKET"
             retry(lambda: self.client.futures_create_order(symbol=self.pair, type=ord_type, newClientOrderId=ord_id, side=side, quantity=ord_qty, stopPrice=stop, reduceOnly="true"))
+        elif take_profit > 0 and reduce_only:
+            ord_type = "TAKE_PROFIT_MARKET"
+            retry(lambda: self.client.futures_create_order(symbol=self.pair, type=ord_type, newClientOrderId=ord_id, side=side, quantity=ord_qty, stopPrice=take_profit, reduceOnly="true"))
         elif stop > 0:
             ord_type = "STOP"
             retry(lambda: self.client.futures_create_order(symbol=self.pair, type=ord_type, newClientOrderId=ord_id, side=side, quantity=ord_qty, stopPrice=stop))
@@ -462,7 +465,7 @@ class BinanceFutures:
 
         self.order(id, long, ord_qty, limit, stop, post_only, reduce_only, trailing_stop, activationPrice, when)
 
-    def order(self, id, long, qty, limit=0, stop=0, post_only=False, reduce_only=False, trailing_stop=0, activationPrice=0, when=True):
+    def order(self, id, long, qty, limit=0, stop=0, take_profit=0, post_only=False, reduce_only=False, trailing_stop=0, activationPrice=0, when=True):
         """
         places an order, works as equivalent to tradingview pine script implementation
         https://www.tradingview.com/pine-script-reference/#fun_strategy{dot}order
@@ -494,9 +497,9 @@ class BinanceFutures:
         ord_id = id + ord_suffix()
 
         if order is None:
-            self.__new_order(ord_id, side, ord_qty, limit, stop, post_only, reduce_only, trailing_stop, activationPrice)
+            self.__new_order(ord_id, side, ord_qty, limit, stop, take_profit, post_only, reduce_only, trailing_stop, activationPrice)
         else:
-            self.__new_order(ord_id, side, ord_qty, limit, stop, post_only, reduce_only, trailing_stop, activationPrice)
+            self.__new_order(ord_id, side, ord_qty, limit, stop, take_profit, post_only, reduce_only, trailing_stop, activationPrice)
             # self.__amend_order(ord_id, side, ord_qty, limit, stop, post_only)
             return
 
