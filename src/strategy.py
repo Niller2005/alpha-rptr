@@ -757,7 +757,12 @@ class Will_Rci(Bot):
         sellCloseCon = buyWillfilterCon
 
         if not eval(os.environ.get("BOT_TEST", "False")):
-            self.exchange.exit(profit=(float(pos_margin / self.take_profit_percent)))
+            # self.exchange.exit(profit=(float(pos_margin / self.take_profit_percent)))
+            if tp_order is None and pos_size != 0:
+                if pos_size < 0:
+                    self.exchange.order("TP", True, abs(pos_size), take_profit=round(self.exchange.get_position_entry_price() * (1 - (1 / self.take_profit_percent) / 20), self.price_decimal_num), reduce_only=True)
+                if pos_size > 0:
+                    self.exchange.order("TP", False, abs(pos_size), take_profit=round(self.exchange.get_position_entry_price() * ((1 / self.take_profit_percent) / 20 + 1), self.price_decimal_num), reduce_only=True)
 
             if buyCloseCon and pos_size > 0:
                 self.exchange.close_all()
@@ -787,7 +792,7 @@ class Will_Rci(Bot):
         logger.info(f"RCI Buy conditions: {buyRCIfillerCon}")
         logger.info(f"RCI Sell conditions: {sellRCIfillerCon}")
         logger.info(f"In {'LONG' if pos_size > 0 else ('SHORT' if pos_size < 0 else 'no')} position")
-        if pos_size != 0:
-            logger.info(f'{float(self.exchange.get_position()["unRealizedProfit"])} / {(pos_margin / self.take_profit_percent)}')
+        # if pos_size != 0:
+        #     logger.info(f'{float(self.exchange.get_position()["unRealizedProfit"])} / {(pos_margin / self.take_profit_percent)}')
 
         # logger.info('all strategy processing time : %s' % str(time.time() - start))
