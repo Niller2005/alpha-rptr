@@ -12,6 +12,8 @@ from hyperopt import hp
 from src import (
     highest,
     lowest,
+    avg_price,
+    typ_price,
     sma,
     crossover,
     crossunder,
