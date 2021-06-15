@@ -8,7 +8,7 @@ from src.binance_futures import BinanceFutures
 
 class BinanceFuturesStub(BinanceFutures):
     # Pair
-    pair = 'BTCUSDT'
+    pair = "BTCUSDT"
     # Default Balance (1000 USDT)
     balance = 1000
     # Default Leverage
@@ -27,6 +27,8 @@ class BinanceFuturesStub(BinanceFutures):
     win_profit = 0
     # Lose Loss
     lose_loss = 0
+    # Dropdown from peak
+    dropdown = 0
     # Max Loss Rate
     max_draw_down = 0
     # max drawdown for the session
@@ -49,9 +51,9 @@ class BinanceFuturesStub(BinanceFutures):
 
     def get_lot(self):
         """
-         Calculate the Lot
-         :return:
-         """
+        Calculate the Lot
+        :return:
+        """
         return int((1 - self.get_retain_rate()) * self.get_balance() * self.get_leverage() * self.get_market_price())
 
     def get_balance(self):
@@ -70,9 +72,9 @@ class BinanceFuturesStub(BinanceFutures):
 
     def get_position_size(self):
         """
-         Get the position size
-         :return:
-         """
+        Get the position size
+        :return:
+        """
         return self.position_size
 
     def get_position_avg_price(self):
@@ -158,8 +160,7 @@ class BinanceFuturesStub(BinanceFutures):
         ord_qty = qty + abs(pos_size)
 
         if limit > 0 or stop > 0:
-            self.open_orders.append(
-                {"id": id, "long": long, "qty": ord_qty, "limit": limit, "stop": stop, "post_only": post_only})
+            self.open_orders.append({"id": id, "long": long, "qty": ord_qty, "limit": limit, "stop": stop, "post_only": post_only})
         else:
             self.commit(id, long, ord_qty, self.get_market_price(), True)
             return
@@ -191,10 +192,10 @@ class BinanceFuturesStub(BinanceFutures):
 
         pos_size = self.get_position_size()
 
-        if long and pos_size >= pyramiding*qty:
+        if long and pos_size >= pyramiding * qty:
             return
 
-        if not long and pos_size <= -(pyramiding*qty):
+        if not long and pos_size <= -(pyramiding * qty):
             return
 
         if cancel_all:
@@ -207,18 +208,17 @@ class BinanceFuturesStub(BinanceFutures):
         else:
             ord_qty = qty
 
-        if long and (pos_size + qty > pyramiding*qty):
-            ord_qty = (pyramiding*qty) - abs(pos_size)
+        if long and (pos_size + qty > pyramiding * qty):
+            ord_qty = (pyramiding * qty) - abs(pos_size)
 
-        if not long and (pos_size - qty < -(pyramiding*qty)):
-            ord_qty = (pyramiding*qty) - abs(pos_size)
+        if not long and (pos_size - qty < -(pyramiding * qty)):
+            ord_qty = (pyramiding * qty) - abs(pos_size)
         # make sure it doesnt spam small entries, which in most cases would trigger risk management orders evaluation, you can make this less than 2% if needed
-        if ord_qty < ((pyramiding*qty) / 100) * 2:
+        if ord_qty < ((pyramiding * qty) / 100) * 2:
             return
 
         if limit > 0 or stop > 0:
-            self.open_orders.append(
-                {"id": id, "long": long, "qty": ord_qty, "limit": limit, "stop": stop, "post_only": post_only})
+            self.open_orders.append({"id": id, "long": long, "qty": ord_qty, "limit": limit, "stop": stop, "post_only": post_only})
         else:
             self.commit(id, long, ord_qty, self.get_market_price(), True)
             return
@@ -239,12 +239,10 @@ class BinanceFuturesStub(BinanceFutures):
 
         if (self.get_position_size() > 0 >= order_qty) or (self.get_position_size() < 0 < order_qty):
             if self.get_position_avg_price() > price:
-                close_rate = ((self.get_position_avg_price() - price) /
-                              price - commission) * self.get_leverage()
+                close_rate = ((self.get_position_avg_price() - price) / price - commission) * self.get_leverage()
                 profit = -1 * self.get_position_size() * close_rate
             else:
-                close_rate = ((price - self.get_position_avg_price()) /
-                              self.get_position_avg_price() - commission) * self.get_leverage()
+                close_rate = ((price - self.get_position_avg_price()) / self.get_position_avg_price() - commission) * self.get_leverage()
                 profit = self.get_position_size() * close_rate
 
             if profit > 0:
@@ -262,13 +260,11 @@ class BinanceFuturesStub(BinanceFutures):
             if self.balance_ath > self.balance:
                 if self.max_draw_down_session == 0:
                     self.max_draw_down_session = self.balance_ath - self.balance
-                    self.max_draw_down_session_perc = (
-                        self.balance_ath - self.balance) / self.balance_ath * 100
+                    self.max_draw_down_session_perc = (self.balance_ath - self.balance) / self.balance_ath * 100
                 else:
                     if self.max_draw_down_session < self.balance_ath - self.balance:
                         self.max_draw_down_session = self.balance_ath - self.balance
-                        self.max_draw_down_session_perc = (
-                            self.balance_ath - self.balance) / self.balance_ath * 100
+                        self.max_draw_down_session_perc = (self.balance_ath - self.balance) / self.balance_ath * 100
 
             if self.enable_trade_log:
                 logger.info(f"========= Close Position =============")
@@ -278,14 +274,11 @@ class BinanceFuturesStub(BinanceFutures):
                 logger.info(f"EXIT PRICE    : {price}")
                 logger.info(f"PROFIT        : {profit}")
                 logger.info(f"BALANCE       : {self.get_balance()}")
-                #logger.info(f"WIN RATE      : {0 if self.order_count == 0 else self.win_count/self.order_count*100} %")
-                logger.info(
-                    f"WIN RATE      : {0 if self.order_count == 0 else self.win_count/(self.win_count + self.lose_count)*100} %")
-                logger.info(
-                    f"PROFIT FACTOR : {self.win_profit if self.lose_loss == 0 else self.win_profit/self.lose_loss}")
+                # logger.info(f"WIN RATE      : {0 if self.order_count == 0 else self.win_count/self.order_count*100} %")
+                logger.info(f"WIN RATE      : {0 if self.order_count == 0 else self.win_count/(self.win_count + self.lose_count)*100} %")
+                logger.info(f"PROFIT FACTOR : {self.win_profit if self.lose_loss == 0 else self.win_profit/self.lose_loss}")
                 logger.info(f"MAX DRAW DOWN : {self.max_draw_down * 100}")
-                logger.info(
-                    f"MAX DRAW DOWN SESSION : {round(self.max_draw_down_session, 4)} or {round(self.max_draw_down_session_perc, 2)}%")
+                logger.info(f"MAX DRAW DOWN SESSION : {round(self.max_draw_down_session, 4)} or {round(self.max_draw_down_session_perc, 2)}%")
                 logger.info(f"======================================")
 
         if next_qty != 0:
@@ -298,11 +291,9 @@ class BinanceFuturesStub(BinanceFutures):
                 logger.info(f"POSITION SIZE : {qty}")
                 logger.info(f"**************************************")
             if long and self.position_size < next_qty:
-                self.position_avg_price = (
-                    self.position_avg_price * self.position_size + price * qty) / next_qty
+                self.position_avg_price = (self.position_avg_price * self.position_size + price * qty) / next_qty
             elif not long and self.position_size > next_qty:
-                self.position_avg_price = (
-                    self.position_avg_price * self.position_size - price * qty) / next_qty
+                self.position_avg_price = (self.position_avg_price * self.position_size - price * qty) / next_qty
             else:
                 self.position_avg_price = price
             self.position_size = next_qty
@@ -323,41 +314,31 @@ class BinanceFuturesStub(BinanceFutures):
         price = self.get_market_price()
 
         # trail asset
-        if self.get_exit_order()['trail_offset'] > 0 and self.get_trail_price() > 0:
-            trail_offset = self.get_exit_order()['trail_offset']
+        if self.get_exit_order()["trail_offset"] > 0 and self.get_trail_price() > 0:
+            trail_offset = self.get_exit_order()["trail_offset"]
             trail_price = self.get_trail_price()
-            if self.get_position_size() > 0 and \
-                    price - trail_offset < trail_price:
-                logger.info(
-                    f"Loss cut by trailing stop: {self.get_exit_order()['trail_offset']}")
+            if self.get_position_size() > 0 and price - trail_offset < trail_price:
+                logger.info(f"Loss cut by trailing stop: {self.get_exit_order()['trail_offset']}")
                 self.close_all()
-            elif self.get_position_size() < 0 and \
-                    price + trail_offset > trail_price:
-                logger.info(
-                    f"Loss cut by trailing stop: {self.get_exit_order()['trail_offset']}")
+            elif self.get_position_size() < 0 and price + trail_offset > trail_price:
+                logger.info(f"Loss cut by trailing stop: {self.get_exit_order()['trail_offset']}")
                 self.close_all()
 
         if self.get_position_avg_price() > price:
-            close_rate = ((self.get_position_avg_price() - price) /
-                          price - self.get_commission()) * self.get_leverage()
+            close_rate = ((self.get_position_avg_price() - price) / price - self.get_commission()) * self.get_leverage()
             unrealised_pnl = -1 * self.get_position_size() * close_rate
         else:
-            close_rate = ((price - self.get_position_avg_price()) /
-                          self.get_position_avg_price() - self.get_commission()) * self.get_leverage()
+            close_rate = ((price - self.get_position_avg_price()) / self.get_position_avg_price() - self.get_commission()) * self.get_leverage()
             unrealised_pnl = self.get_position_size() * close_rate
 
         # If loss is set
-        if unrealised_pnl < 0 and \
-                0 < self.get_exit_order()['loss'] < abs(unrealised_pnl):
-            logger.info(
-                f"Loss cut by stop loss: {self.get_exit_order()['loss']}")
+        if unrealised_pnl < 0 and 0 < self.get_exit_order()["loss"] < abs(unrealised_pnl):
+            logger.info(f"Loss cut by stop loss: {self.get_exit_order()['loss']}")
             self.close_all()
 
         # If profit is set
-        if unrealised_pnl > 0 and \
-                0 < self.get_exit_order()['profit'] < abs(unrealised_pnl):
-            logger.info(
-                f"Take profit by stop profit: {self.get_exit_order()['profit']}")
+        if unrealised_pnl > 0 and 0 < self.get_exit_order()["profit"] < abs(unrealised_pnl):
+            logger.info(f"Take profit by stop profit: {self.get_exit_order()['profit']}")
             self.close_all()
 
     def eval_sltp(self):
@@ -370,41 +351,37 @@ class BinanceFuturesStub(BinanceFutures):
 
         best_bid = self.market_price
         best_ask = self.market_price
-        tp_percent_long = self.get_sltp_values()['profit_long']
-        tp_percent_short = self.get_sltp_values()['profit_short']
+        tp_percent_long = self.get_sltp_values()["profit_long"]
+        tp_percent_short = self.get_sltp_values()["profit_short"]
 
         avg_entry = self.get_position_avg_price()
 
-        sl_percent_long = self.get_sltp_values()['stop_long']
-        sl_percent_short = self.get_sltp_values()['stop_short']
+        sl_percent_long = self.get_sltp_values()["stop_long"]
+        sl_percent_short = self.get_sltp_values()["stop_short"]
 
         if sl_percent_long > 0:
             if pos_size > 0:
-                sl_price_long = round(
-                    avg_entry - (avg_entry * sl_percent_long), self.round_decimals)
-                if self.OHLC['low'][-1] <= sl_price_long:
+                sl_price_long = round(avg_entry - (avg_entry * sl_percent_long), self.round_decimals)
+                if self.OHLC["low"][-1] <= sl_price_long:
                     self.close_all_at_price(sl_price_long)
         if sl_percent_short > 0:
             if pos_size < 0:
-                sl_price_short = round(
-                    avg_entry + (avg_entry * sl_percent_short), self.round_decimals)
-                if self.OHLC['high'][-1] >= sl_price_short:
+                sl_price_short = round(avg_entry + (avg_entry * sl_percent_short), self.round_decimals)
+                if self.OHLC["high"][-1] >= sl_price_short:
                     self.close_all_at_price(sl_price_short)
         if tp_percent_long > 0:
             if pos_size > 0:
-                tp_price_long = round(
-                    avg_entry + (avg_entry*tp_percent_long), self.round_decimals)
-                if tp_price_long <= best_ask and self.get_sltp_values()['eval_tp_next_candle'] == True:
+                tp_price_long = round(avg_entry + (avg_entry * tp_percent_long), self.round_decimals)
+                if tp_price_long <= best_ask and self.get_sltp_values()["eval_tp_next_candle"] == True:
                     tp_price_long = best_ask
-                if self.OHLC['high'][-1] >= tp_price_long:
+                if self.OHLC["high"][-1] >= tp_price_long:
                     self.close_all_at_price(tp_price_long)
         if tp_percent_short > 0:
             if pos_size < 0:
-                tp_price_short = round(
-                    avg_entry - (avg_entry*tp_percent_short), self.round_decimals)
-                if tp_price_short >= best_bid and self.get_sltp_values()['eval_tp_next_candle'] == True:
+                tp_price_short = round(avg_entry - (avg_entry * tp_percent_short), self.round_decimals)
+                if tp_price_short >= best_bid and self.get_sltp_values()["eval_tp_next_candle"] == True:
                     tp_price_short = best_bid
-                if self.OHLC['low'][-1] <= tp_price_short:
+                if self.OHLC["low"][-1] <= tp_price_short:
                     self.close_all_at_price(tp_price_short)
 
     def on_update(self, bin_size, strategy):
@@ -412,14 +389,10 @@ class BinanceFuturesStub(BinanceFutures):
         Register function of strategy.
         :param strategy:
         """
+
         def __override_strategy(open, close, high, low, volume):
             new_open_orders = []
-            self.OHLC = {
-                'open': open,
-                'high': high,
-                'low': low,
-                'close': close
-            }
+            self.OHLC = {"open": open, "high": high, "low": low, "close": close}
 
             if self.get_position_size() > 0 and low[-1] > self.get_trail_price():
                 self.set_trail_price(low[-1])
@@ -439,8 +412,7 @@ class BinanceFuturesStub(BinanceFutures):
                         self.commit(id, long, qty, limit, False)
                         continue
                     elif (long and high[-1] > stop) or (not long and low[-1] < stop):
-                        new_open_orders.append(
-                            {"id": id, "long": long, "qty": qty, "limit": limit, "stop": 0})
+                        new_open_orders.append({"id": id, "long": long, "qty": qty, "limit": limit, "stop": 0})
                         continue
                 elif limit > 0:
                     if (long and low[-1] < limit) or (not long and high[-1] > limit):
@@ -454,8 +426,8 @@ class BinanceFuturesStub(BinanceFutures):
                 new_open_orders.append(order)
 
             self.open_orders = new_open_orders
-            strategy(open, close, high, low, volume)
             self.eval_exit()
-            # self.eval_sltp()
+            self.eval_sltp()
+            strategy(open, close, high, low, volume)
 
         BinanceFutures.on_update(self, bin_size, __override_strategy)
