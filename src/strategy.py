@@ -683,9 +683,6 @@ class Will_Rci(Bot):
     def ohlcv_len(self):
         return 6790
 
-    def lot_leverage(self):
-        return int(os.environ.get("BOT_LOT_LEVERAGE", 20))
-
     def options(self):
         return {
             "rcv_short_len": hp.quniform("rcv_short_len", 1, 21, 1),

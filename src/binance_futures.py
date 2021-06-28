@@ -118,7 +118,7 @@ class BinanceFutures:
         get leverage for lot calculation
         :return:
         """
-        return 20
+        return int(os.environ.get("BOT_LOT_LEVERAGE", 20))
 
     def get_lot(self, round_decimals=3):
         """
