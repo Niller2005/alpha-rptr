@@ -683,6 +683,9 @@ class Will_Rci(Bot):
     def ohlcv_len(self):
         return 6790
 
+    def lot_leverage(self):
+        return int(os.environ.get("BOT_LOT_LEVERAGE", 20))
+
     def options(self):
         return {
             "rcv_short_len": hp.quniform("rcv_short_len", 1, 21, 1),
@@ -697,7 +700,7 @@ class Will_Rci(Bot):
         lot = round(lot / self.lot_percent, self.decimal_num)
 
         pos_size = self.exchange.get_position_size()
-        pos_margin = (abs(pos_size) * self.exchange.get_position_entry_price()) / 20
+        pos_margin = (abs(pos_size) * self.exchange.get_position_entry_price()) / self.exchange.get_leverage()
         tp_order = self.exchange.get_open_order("TP")
 
         itv_s = self.input("rcv_short_len", int, 21)
@@ -762,9 +765,9 @@ class Will_Rci(Bot):
             # self.exchange.exit(profit=(float(pos_margin / self.take_profit_percent)))
             if tp_order is None and pos_size != 0:
                 if pos_size < 0:
-                    self.exchange.order("TP", True, abs(pos_size), take_profit=round(self.exchange.get_position_entry_price() * (1 - (1 / self.take_profit_percent) / 20), self.price_decimal_num), reduce_only=True)
+                    self.exchange.order("TP", True, abs(pos_size), take_profit=round(self.exchange.get_position_entry_price() * (1 - (1 / self.take_profit_percent) / self.exchange.get_leverage()), self.price_decimal_num), reduce_only=True)
                 if pos_size > 0:
-                    self.exchange.order("TP", False, abs(pos_size), take_profit=round(self.exchange.get_position_entry_price() * ((1 / self.take_profit_percent) / 20 + 1), self.price_decimal_num), reduce_only=True)
+                    self.exchange.order("TP", False, abs(pos_size), take_profit=round(self.exchange.get_position_entry_price() * ((1 / self.take_profit_percent) / self.exchange.get_leverage() + 1), self.price_decimal_num), reduce_only=True)
 
             if (buyCloseCon and pos_size > 0) or (sellCloseCon and pos_size < 0):
                 self.exchange.close_all()
@@ -783,7 +786,7 @@ class Will_Rci(Bot):
         logger.info(f"x:   {round(x[-1], 2)}")
         logger.info(f"y:   {round(y[-1], 2)}")
         logger.info(f"rc:  {round(rc, 2)}")
-        logger.info(f"lot: {round(lot, self.decimal_num)} ({round(lot + abs(pos_size), self.decimal_num)})")
+        logger.info(f"lot: {round(lot, self.decimal_num)}")
 
         logger.info(f"--------------------------------------")
 
