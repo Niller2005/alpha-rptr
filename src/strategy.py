@@ -760,20 +760,22 @@ class Will_Rci(Bot):
 
         if not eval(os.environ.get("BOT_TEST", "False")):
             # self.exchange.exit(profit=(float(pos_margin / self.take_profit_percent)))
-            if tp_order is None and pos_size != 0:
-                if pos_size < 0:
-                    self.exchange.order("TP", True, abs(pos_size), take_profit=round(self.exchange.get_position_entry_price() * (1 - (1 / self.take_profit_percent) / self.exchange.get_leverage()), self.price_decimal_num), reduce_only=True)
-                if pos_size > 0:
-                    self.exchange.order("TP", False, abs(pos_size), take_profit=round(self.exchange.get_position_entry_price() * ((1 / self.take_profit_percent) / self.exchange.get_leverage() + 1), self.price_decimal_num), reduce_only=True)
+            # if tp_order is None and pos_size != 0:
+            #     if pos_size < 0:
+            #         self.exchange.order("TP", True, abs(pos_size), take_profit=round(self.exchange.get_position_entry_price() * (1 - (1 / self.take_profit_percent) / self.exchange.get_leverage()), self.price_decimal_num), reduce_only=True)
+            #     if pos_size > 0:
+            #         self.exchange.order("TP", False, abs(pos_size), take_profit=round(self.exchange.get_position_entry_price() * ((1 / self.take_profit_percent) / self.exchange.get_leverage() + 1), self.price_decimal_num), reduce_only=True)
 
-            if (buyCloseCon and pos_size > 0) or (sellCloseCon and pos_size < 0):
-                self.exchange.close_all()
-                self.exchange.cancel_all()
+            # if (buyCloseCon and pos_size > 0) or (sellCloseCon and pos_size < 0):
+            #     self.exchange.close_all()
+            #     self.exchange.cancel_all()
 
             if buyCon and pos_size <= 0:
                 self.exchange.order("Long", True, lot)
+                self.exchange.order("LongTS", False, lot, trailing_stop=1)
             if sellCon and pos_size >= 0:
                 self.exchange.order("Short", False, lot)
+                self.exchange.order("ShortTS", True, lot, trailing_stop=1)
 
         logger.info(f"--------------------------------------")
 
