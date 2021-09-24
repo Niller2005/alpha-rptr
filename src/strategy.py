@@ -693,7 +693,7 @@ class Will_Rci(Bot):
     def strategy(self, open, close, high, low, volume):
         # logger.info('strategy start ctime : %s' % time.ctime())
         # start = time.time()  # 시작 시간 저장
-        lot = self.exchange.get_lot()
+        lot = self.exchange.get_lot(asset="BUSD")
         lot = round(lot / self.lot_percent, self.decimal_num)
 
         pos_size = self.exchange.get_position_size()

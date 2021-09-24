@@ -120,14 +120,15 @@ class BinanceFutures:
         """
         return int(os.environ.get("BOT_LOT_LEVERAGE", 20))
 
-    def get_lot(self, round_decimals=3):
+    def get_lot(self, round_decimals=3, asset="BUSD"):
         """
         lot calculation
         :param round_decimals: round decimals
         :return:
         """
         account_information = self.get_account_information()
-        return round(float(account_information["totalMarginBalance"]) / self.get_market_price() * self.lot_leverage(), round_decimals)
+        margin_asset = [a for a in account_information["assets"] if a["asset"] == asset]
+        return round(float(margin_asset["marginBalance"]) / self.get_market_price() * self.lot_leverage(), round_decimals)
 
     def get_balance(self):
         """
