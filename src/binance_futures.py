@@ -137,7 +137,7 @@ class BinanceFutures:
         self.__init_client()
         return float(self.get_margin()["balance"])
 
-    def get_margin(self, asset="USDT"):
+    def get_margin(self, asset="BUSD"):
         """
         get margin
         :return:
